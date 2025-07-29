@@ -1,45 +1,42 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// 1. Get the selected date (from URL ?date=, or today)
+// --- 1. Get the selected date (or today) ---
 $chosen_date = isset($_GET['date']) ? sanitize_text_field($_GET['date']) : date('Y-m-d');
 
-// 2. Load all tables
+// --- 2. Load tables ---
 $tables = class_exists('YRR_Tables_Model') ? YRR_Tables_Model::get_all() : array();
 
-// 3. Get open/close times (from Hours Model, fallback 09:00-23:00)
+// --- 3. Get open/close times (or fallback) ---
 if (class_exists('YRR_Hours_Model')) {
     $dayname = date('l', strtotime($chosen_date));
     $hours = YRR_Hours_Model::get_hours_for_day($dayname);
-    $open  = ($hours && !empty($hours->open_time))  ? $hours->open_time  : '09:00';
+    $open = ($hours && !empty($hours->open_time)) ? $hours->open_time : '09:00';
     $close = ($hours && !empty($hours->close_time)) ? $hours->close_time : '23:00';
 } else {
-    $open = '09:00';
-    $close= '23:00';
+    $open = '09:00'; $close = '23:00';
 }
 
-// 4. Slot duration (in minutes, from settings)
+// --- 4. Get slot duration ---
 $slot_duration = (class_exists('YRR_Settings_Model') && method_exists('YRR_Settings_Model', 'get_setting'))
     ? intval(YRR_Settings_Model::get_setting('slot_duration'))
-    : 60; // default 60min
+    : 60; // default 60 minutes
 
-// 5. Generate slot list (array of 'H:i')
+// --- 5. Time slots for grid ---
 $slots = [];
 for ($t = strtotime($open); $t < strtotime($close); $t += $slot_duration * 60) {
     $slots[] = date('H:i', $t);
 }
 
-// 6. LOAD ONLY THIS DAY's RESERVATIONS! (Fixes memory bug)
+// --- 6. ONLY load reservations needed for the day! ---
 $reservations = class_exists('YRR_Reservation_Model')
     ? YRR_Reservation_Model::get_all(
-        9999, 0, [
-          'date_from' => $chosen_date,
-          'date_to'   => $chosen_date
-        ]
-      )
+        9999, 0,
+        ['date_from' => $chosen_date, 'date_to' => $chosen_date]
+    )
     : array();
 
-// 7. Index reservations for grid: [table_id][slot_time] = reservation
+// --- 7. Index lookup for instant grid rendering ---
 $res_map = [];
 foreach ($reservations as $r) {
     if (!empty($r->table_id)) {
@@ -66,8 +63,8 @@ foreach ($reservations as $r) {
                     <th><?php esc_html_e('Time', 'yrr'); ?></th>
                     <?php foreach($tables as $tbl): ?>
                         <th>
-                          <?php echo esc_html($tbl->table_number); ?>
-                          <?php if (!empty($tbl->location)) echo ' <small>' . esc_html($tbl->location) . '</small>'; ?>
+                            <?php echo esc_html($tbl->table_number); ?>
+                            <?php if (!empty($tbl->location)) echo ' <small>' . esc_html($tbl->location) . '</small>'; ?>
                         </th>
                     <?php endforeach; ?>
                 </tr>
