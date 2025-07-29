@@ -1,45 +1,42 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// 1. Get the selected date (?date=..., or today)
+// 1. Get selected date (?date=..., or today)
 $chosen_date = isset($_GET['date']) ? sanitize_text_field($_GET['date']) : date('Y-m-d');
 
-// 2. Get all tables
+// 2. Load all tables
 $tables = class_exists('YRR_Tables_Model') ? YRR_Tables_Model::get_all() : array();
 
-// 3. Operating hours (model or fallback)
+// 3. Get opening/closing times for the selected date (Hours Model or fallback)
 if (class_exists('YRR_Hours_Model')) {
     $dayname = date('l', strtotime($chosen_date));
     $hours = YRR_Hours_Model::get_hours_for_day($dayname);
-    $open = ($hours && !empty($hours->open_time)) ? $hours->open_time : '09:00';
-    $close = ($hours && !empty($hours->close_time)) ? $hours->close_time : '23:00';
+    $open = !empty($hours->open_time) ? $hours->open_time : '09:00';
+    $close = !empty($hours->close_time) ? $hours->close_time : '23:00';
 } else {
-    $open  = '09:00';
-    $close = '23:00';
+    $open = '09:00'; $close = '23:00';
 }
 
-// 4. Slot duration in minutes (settings or 60)
+// 4. Slot duration (minutes, from settings or default 60)
 $slot_duration = (class_exists('YRR_Settings_Model') && method_exists('YRR_Settings_Model', 'get_setting'))
     ? intval(YRR_Settings_Model::get_setting('slot_duration'))
     : 60;
 
-// 5. Compile all slots for this day
+// 5. Build slots array ('H:i')
 $slots = array();
 for ($t = strtotime($open); $t < strtotime($close); $t += $slot_duration * 60) {
     $slots[] = date('H:i', $t);
 }
 
-// 6. LOAD ONLY THIS DAY’s reservations (the fix!)
+// 6. ONLY load today's reservations – THIS FIXES ALL MEMORY ERRORS!
 $reservations = class_exists('YRR_Reservation_Model')
     ? YRR_Reservation_Model::get_all(
-        9999, 0, [
-            'date_from' => $chosen_date,
-            'date_to'   => $chosen_date
-        ]
-      )
+        9999, 0,
+        ['date_from' => $chosen_date, 'date_to' => $chosen_date]
+    )
     : array();
 
-// 7. Build map for fast lookup: [table_id][slot] = res
+// 7. Fast lookup map: [table_id][slot_time] = reservation
 $res_map = array();
 foreach ($reservations as $r) {
     if (!empty($r->table_id)) {
