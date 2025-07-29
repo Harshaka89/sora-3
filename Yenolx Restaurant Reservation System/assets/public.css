@@ -1,0 +1,364 @@
+/**
+ * Yenolx Restaurant Reservation System v1.6 - Public Styles
+ * Beautiful, responsive styling for customer-facing booking forms
+ */
+
+/* ===== BASE PUBLIC STYLES ===== */
+.yrr-public-booking-form,
+.yrr-my-reservations {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.yrr-form-title,
+.yrr-section-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 30px;
+    position: relative;
+}
+
+.yrr-form-title::after,
+.yrr-section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+/* ===== BOOKING FORM STYLES ===== */
+.yrr-booking-form {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    padding: 40px;
+}
+
+/* ===== FORM STEPS ===== */
+.yrr-form-step {
+    display: none;
+    min-height: 400px;
+    position: relative;
+}
+
+.yrr-form-step.yrr-step-active {
+    display: block;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.yrr-form-step h4 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 25px;
+    text-align: center;
+    position: relative;
+}
+
+.yrr-form-step h4::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: #667eea;
+    margin: 8px auto 0;
+    border-radius: 1px;
+}
+
+/* ===== FORM FIELDS ===== */
+.yrr-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.yrr-form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.yrr-form-field label {
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 8px;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.yrr-form-control {
+    padding: 12px 16px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #fff;
+    color: #2c3e50;
+}
+
+.yrr-form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.yrr-form-control:hover {
+    border-color: #cbd6ee;
+}
+
+/* ===== TIME SLOTS ===== */
+.yrr-time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.yrr-time-slot {
+    padding: 12px 16px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+    font-weight: 500;
+    color: #34495e;
+    position: relative;
+    overflow: hidden;
+}
+
+.yrr-time-slot:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.yrr-time-slot.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-color: #667eea;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.yrr-time-slot.unavailable {
+    background: #f8f9fa;
+    color: #95a5a6;
+    border-color: #ecf0f1;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.yrr-time-slot.unavailable:hover {
+    transform: none;
+    border-color: #ecf0f1;
+    box-shadow: none;
+    background: #f8f9fa;
+    color: #95a5a6;
+}
+
+/* ===== BUTTONS ===== */
+.yrr-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.yrr-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.yrr-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: 2px solid #667eea;
+}
+
+.yrr-btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    color: #fff;
+}
+
+.yrr-btn-secondary {
+    background: #fff;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.yrr-btn-secondary:hover {
+    background: #667eea;
+    color: #fff;
+}
+
+.yrr-btn-success {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: #fff;
+    border: 2px solid #2ecc71;
+}
+
+.yrr-btn-success:hover {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+/* ===== FORM ACTIONS ===== */
+.yrr-form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #e9ecef;
+}
+
+.yrr-form-actions .yrr-btn {
+    min-width: 120px;
+}
+
+/* ===== MY RESERVATIONS STYLES ===== */
+.yrr-reservation-search {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+.yrr-search-form .yrr-form-row {
+    margin-bottom: 20px;
+}
+
+.yrr-reservations-list {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.yrr-reservation-item {
+    padding: 25px;
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.3s ease;
+}
+
+.yrr-reservation-item:last-child {
+    border-bottom: none;
+}
+
+.yrr-reservation-item:hover {
+    background: #f8f9fa;
+}
+
+.yrr-empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* ===== LOADING STATES ===== */
+.yrr-loading-message {
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+.yrr-loading {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.yrr-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .yrr-public-booking-form,
+    .yrr-my-reservations {
+        margin: 0 15px;
+    }
+    
+    .yrr-booking-form {
+        padding: 30px 20px;
+    }
+    
+    .yrr-form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .yrr-time-slots {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .yrr-form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .yrr-form-actions .yrr-btn {
+        width: 100%;
+    }
+}

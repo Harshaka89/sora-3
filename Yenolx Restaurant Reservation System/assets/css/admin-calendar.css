@@ -1,0 +1,689 @@
+/*!
+ * Yenolx Restaurant Reservation System v1.6
+ * Calendar Admin Interface Styles
+ * Clean, Modern, Touch-Friendly Design
+ */
+
+/* ===== CSS VARIABLES ===== */
+:root {
+    --yrr-primary: #4f46e5;
+    --yrr-primary-light: #6366f1;
+    --yrr-primary-dark: #3730a3;
+    --yrr-success: #10b981;
+    --yrr-warning: #f59e0b;
+    --yrr-danger: #ef4444;
+    --yrr-info: #3b82f6;
+    
+    --yrr-bg-primary: #ffffff;
+    --yrr-bg-secondary: #f8fafc;
+    --yrr-bg-accent: #f1f5f9;
+    --yrr-bg-muted: #e2e8f0;
+    
+    --yrr-text-primary: #1e293b;
+    --yrr-text-secondary: #64748b;
+    --yrr-text-muted: #94a3b8;
+    --yrr-text-light: #cbd5e1;
+    
+    --yrr-border: #e2e8f0;
+    --yrr-border-light: #f1f5f9;
+    --yrr-border-dark: #cbd5e1;
+    
+    --yrr-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --yrr-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --yrr-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --yrr-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+    
+    --yrr-radius: 8px;
+    --yrr-radius-sm: 6px;
+    --yrr-radius-lg: 12px;
+    --yrr-radius-xl: 16px;
+    
+    --yrr-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --yrr-transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== BASE LAYOUT ===== */
+.yrr-calendar-wrap {
+    max-width: none;
+    margin: 0;
+    padding: 24px;
+    background: var(--yrr-bg-secondary);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+/* ===== HEADER STYLES ===== */
+.yrr-calendar-wrap .wp-heading-inline {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--yrr-text-primary);
+    margin: 0 0 24px 0;
+    display: inline-block;
+}
+
+/* ===== ADD NEW BUTTON ===== */
+.page-title-action.yrr-btn-create-reservation {
+    background: var(--yrr-primary) !important;
+    border: none !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: var(--yrr-radius) !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    box-shadow: var(--yrr-shadow) !important;
+    transition: var(--yrr-transition) !important;
+    min-height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+}
+
+.page-title-action.yrr-btn-create-reservation:hover {
+    background: var(--yrr-primary-light) !important;
+    box-shadow: var(--yrr-shadow-md) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.page-title-action.yrr-btn-create-reservation:focus {
+    outline: 2px solid var(--yrr-primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* ===== CALENDAR HEADER ===== */
+.yrr-calendar-header {
+    background: var(--yrr-bg-primary);
+    border: 1px solid var(--yrr-border);
+    border-radius: var(--yrr-radius-lg);
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: var(--yrr-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.yrr-calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.yrr-calendar-nav .button {
+    background: var(--yrr-bg-secondary) !important;
+    border: 1px solid var(--yrr-border) !important;
+    border-radius: var(--yrr-radius) !important;
+    padding: 8px 16px !important;
+    font-weight: 500 !important;
+    color: var(--yrr-text-primary) !important;
+    transition: var(--yrr-transition) !important;
+    box-shadow: none !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+}
+
+.yrr-calendar-nav .button:hover {
+    background: var(--yrr-bg-accent) !important;
+    border-color: var(--yrr-primary) !important;
+    color: var(--yrr-text-primary) !important;
+}
+
+.yrr-current-week h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--yrr-text-primary);
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+/* ===== STATISTICS CARDS ===== */
+.yrr-week-stats {
+    margin: 20px 0;
+}
+
+.yrr-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.yrr-stat-card {
+    background: var(--yrr-bg-primary);
+    border: 1px solid var(--yrr-border);
+    border-radius: var(--yrr-radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--yrr-shadow);
+    transition: var(--yrr-transition);
+}
+
+.yrr-stat-card:hover {
+    box-shadow: var(--yrr-shadow-md);
+    transform: translateY(-1px);
+}
+
+.yrr-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--yrr-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--yrr-bg-accent);
+    color: var(--yrr-primary);
+    flex-shrink: 0;
+}
+
+.yrr-stat-content h3 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--yrr-text-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+.yrr-stat-content p {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--yrr-text-secondary);
+    margin: 4px 0 0;
+}
+
+/* ===== CALENDAR CONTAINER ===== */
+.yrr-calendar-container {
+    background: var(--yrr-bg-primary);
+    border: 1px solid var(--yrr-border);
+    border-radius: var(--yrr-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--yrr-shadow);
+    margin: 20px 0;
+}
+
+.yrr-calendar-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(7, 1fr);
+    min-width: 1000px;
+}
+
+/* ===== TIME COLUMN ===== */
+.yrr-time-column {
+    background: var(--yrr-bg-accent);
+    border-right: 1px solid var(--yrr-border);
+}
+
+.yrr-time-header {
+    padding: 16px 8px;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid var(--yrr-border);
+    background: var(--yrr-primary);
+    color: white;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.yrr-time-column .yrr-time-slot {
+    padding: 16px 8px;
+    border-bottom: 1px solid var(--yrr-border-light);
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--yrr-text-secondary);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== DAY COLUMNS ===== */
+.yrr-day-column {
+    border-right: 1px solid var(--yrr-border-light);
+    min-height: 900px;
+    position: relative;
+    transition: var(--yrr-transition);
+}
+
+.yrr-day-column:last-child {
+    border-right: none;
+}
+
+.yrr-day-column.yrr-today {
+    background: linear-gradient(180deg, rgba(79, 70, 229, 0.02) 0%, transparent 100%);
+}
+
+.yrr-day-column.yrr-today::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--yrr-primary);
+}
+
+/* ===== DAY HEADERS ===== */
+.yrr-day-header {
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--yrr-border);
+    background: var(--yrr-bg-primary);
+    text-align: center;
+}
+
+.yrr-today .yrr-day-header {
+    background: var(--yrr-primary);
+    color: white;
+}
+
+.yrr-day-header h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.yrr-day-date {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.yrr-day-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* ===== TIME SLOTS ===== */
+.yrr-time-slot-container {
+    min-height: 60px;
+    border-bottom: 1px solid var(--yrr-border-light);
+    padding: 4px;
+    position: relative;
+    transition: var(--yrr-transition);
+}
+
+.yrr-time-slot-container:hover {
+    background: rgba(79, 70, 229, 0.01);
+}
+
+/* ===== EMPTY SLOTS ===== */
+.yrr-empty-slot {
+    height: 52px;
+    border: 1px dashed var(--yrr-border);
+    border-radius: var(--yrr-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--yrr-transition);
+    background: transparent;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.yrr-empty-slot:hover {
+    border-color: var(--yrr-primary);
+    background: rgba(79, 70, 229, 0.02);
+    transform: scale(1.02);
+}
+
+.yrr-empty-slot:active {
+    transform: scale(0.98);
+}
+
+.yrr-add-icon {
+    font-size: 1.25rem;
+    color: var(--yrr-text-muted);
+    font-weight: 400;
+    transition: var(--yrr-transition);
+}
+
+.yrr-empty-slot:hover .yrr-add-icon {
+    color: var(--yrr-primary);
+}
+
+/* ===== RESERVATION BLOCKS ===== */
+.yrr-reservation-block {
+    background: var(--yrr-bg-primary);
+    border: 1px solid var(--yrr-border);
+    border-radius: var(--yrr-radius);
+    padding: 8px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: var(--yrr-transition);
+    box-shadow: var(--yrr-shadow);
+    position: relative;
+    min-height: 40px;
+    border-left: 3px solid var(--yrr-primary);
+}
+
+.yrr-reservation-block:hover {
+    box-shadow: var(--yrr-shadow-md);
+    transform: translateY(-1px);
+}
+
+.yrr-reservation-block:active {
+    transform: translateY(0);
+}
+
+.yrr-reservation-time {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--yrr-text-primary);
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.yrr-reservation-customer {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--yrr-text-primary);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.yrr-reservation-party {
+    font-size: 0.6875rem;
+    color: var(--yrr-text-secondary);
+    font-weight: 400;
+}
+
+/* ===== STATUS COLORS ===== */
+.yrr-reservation-block.yrr-status-pending {
+    border-left-color: var(--yrr-warning);
+}
+
+.yrr-reservation-block.yrr-status-confirmed {
+    border-left-color: var(--yrr-success);
+}
+
+.yrr-reservation-block.yrr-status-completed {
+    border-left-color: var(--yrr-info);
+}
+
+.yrr-reservation-block.yrr-status-cancelled {
+    border-left-color: var(--yrr-danger);
+    opacity: 0.6;
+}
+
+/* ===== LEGEND ===== */
+.yrr-calendar-legend {
+    background: var(--yrr-bg-primary);
+    border: 1px solid var(--yrr-border);
+    border-radius: var(--yrr-radius-lg);
+    padding: 16px;
+    margin: 20px 0;
+    box-shadow: var(--yrr-shadow);
+}
+
+.yrr-calendar-legend h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--yrr-text-primary);
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.yrr-legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.yrr-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--yrr-text-secondary);
+}
+
+.yrr-legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.yrr-legend-color.yrr-status-pending { background: var(--yrr-warning); }
+.yrr-legend-color.yrr-status-confirmed { background: var(--yrr-success); }
+.yrr-legend-color.yrr-status-completed { background: var(--yrr-info); }
+.yrr-legend-color.yrr-status-cancelled { background: var(--yrr-danger); }
+
+/* ===== MODAL STYLES ===== */
+.yrr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.yrr-modal-content {
+    background: var(--yrr-bg-primary);
+    border-radius: var(--yrr-radius-lg);
+    box-shadow: var(--yrr-shadow-xl);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+}
+
+.yrr-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--yrr-border);
+    background: var(--yrr-primary);
+    color: white;
+    border-radius: var(--yrr-radius-lg) var(--yrr-radius-lg) 0 0;
+}
+
+.yrr-modal-header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.yrr-modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    color: white;
+    border-radius: 4px;
+    transition: var(--yrr-transition);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.yrr-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.yrr-modal-body {
+    padding: 20px;
+}
+
+.yrr-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--yrr-border);
+    background: var(--yrr-bg-secondary);
+    border-radius: 0 0 var(--yrr-radius-lg) var(--yrr-radius-lg);
+}
+
+/* ===== INTERACTIVE STATES ===== */
+.yrr-slot-active {
+    background: rgba(79, 70, 229, 0.1) !important;
+    border-color: var(--yrr-primary) !important;
+    transform: scale(0.98) !important;
+}
+
+.yrr-reservation-active {
+    background: var(--yrr-bg-primary) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: var(--yrr-shadow-lg) !important;
+}
+
+.yrr-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--yrr-border);
+    border-top: 3px solid var(--yrr-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media screen and (max-width: 1024px) {
+    .yrr-calendar-wrap {
+        padding: 16px;
+    }
+    
+    .yrr-calendar-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .yrr-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .yrr-calendar-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .yrr-calendar-wrap .wp-heading-inline {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+    
+    .page-title-action.yrr-btn-create-reservation {
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin: 16px 0 !important;
+    }
+    
+    .yrr-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .yrr-stat-card {
+        flex-direction: row;
+        padding: 16px;
+    }
+    
+    .yrr-calendar-grid {
+        grid-template-columns: 80px repeat(7, 1fr);
+        min-width: 700px;
+    }
+    
+    .yrr-legend-items {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .yrr-calendar-wrap {
+        padding: 12px;
+    }
+    
+    .yrr-calendar-grid {
+        min-width: 600px;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.yrr-empty-slot:focus,
+.yrr-reservation-block:focus,
+.yrr-calendar-nav .button:focus,
+.page-title-action:focus {
+    outline: 2px solid var(--yrr-primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .page-title-action,
+    .yrr-calendar-nav,
+    .yrr-legend-items {
+        display: none !important;
+    }
+    
+    .yrr-calendar-wrap {
+        background: white !important;
+        padding: 0 !important;
+    }
+    
+    .yrr-calendar-container {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+}

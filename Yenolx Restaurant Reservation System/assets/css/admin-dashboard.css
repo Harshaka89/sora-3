@@ -1,0 +1,29 @@
+.yrr-dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+.yrr-dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px #0001;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  font-size: 1.2rem;
+  transition: box-shadow 0.2s;
+}
+.yrr-dashboard-card .yrr-stat-icon {
+  font-size: 2.5rem;
+}
+.yrr-stat-label { color: #64748b; font-size: .9em; }
+.yrr-stat-val   { font-size: 2.1em; font-weight: bold; margin-bottom: 0.4rem; }
+.yrr-dashboard-actions { margin: 3rem 0 2rem; }
+.yrr-dashboard-actions .button { margin-right:1rem; background: #6366f1; color:#fff;}
+.yrr-dashboard-actions .button:hover { background: #4f46e5!important; color:#fff;}
+.yrr-stat-reservations .yrr-stat-icon { color: #10b981; }
+.yrr-stat-covers .yrr-stat-icon { color: #14b8a6; }
+.yrr-stat-revenue .yrr-stat-icon { color: #f59e0b; }
+.yrr-stat-tables .yrr-stat-icon { color: #6366f1; }
