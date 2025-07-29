@@ -1,17 +1,17 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// Get the current week or the specified week from URL
+// Get the current week (or a selected week from URL)
 $current_week = isset($_GET['week']) ? sanitize_text_field($_GET['week']) : date('Y-m-d');
 $week_start = date('Y-m-d', strtotime('monday this week', strtotime($current_week)));
 $week_end   = date('Y-m-d', strtotime('sunday this week', strtotime($current_week)));
 
-// Fetch all reservations for the week
+// Fetch reservations this week
 $reservations = class_exists('YRR_Reservation_Model')
-    ? YRR_Reservation_Model::get_all(['date_from'=>$week_start, 'date_to'=>$week_end])
+    ? YRR_Reservation_Model::get_all(['date_from' => $week_start, 'date_to' => $week_end])
     : array();
 
-// Organize reservations by day
+// Sort reservations by day
 $calendar_data = [];
 for ($i=0; $i<7; $i++) {
     $dt = date('Y-m-d', strtotime($week_start . " +$i days"));
@@ -23,7 +23,7 @@ foreach ($reservations as $r) {
     }
 }
 
-// Navigation
+// Prepare navigation
 $prev_week = date('Y-m-d', strtotime($week_start . ' -7 days'));
 $next_week = date('Y-m-d', strtotime($week_start . ' +7 days'));
 $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -68,7 +68,7 @@ $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
                 $day_res = $calendar_data[$dt];
                 $is_today = ($dt === date('Y-m-d'));
             ?>
-            <div class="yrr-day-column <?php echo $is_today?'yrr-today':''; ?>" data-date="<?php echo $dt; ?>">
+            <div class="yrr-day-column <?php echo $is_today?'yrr-today':''; ?>" data-date="<?php echo esc_attr($dt); ?>">
                 <div class="yrr-day-header">
                     <h3><?php echo $day_name; ?></h3>
                     <div class="yrr-day-date"><?php echo date('M j', strtotime($dt)); ?></div>
@@ -79,9 +79,9 @@ $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
                         $slots = array_filter($day_res, function($r) use ($hour) {
                             return intval(date('H', strtotime($r->reservation_time))) === $hour; });
                     ?>
-                    <div class="yrr-time-slot-container" data-time="<?php echo $time_24; ?>">
+                    <div class="yrr-time-slot-container" data-time="<?php echo esc_attr($time_24); ?>">
                         <?php if (empty($slots)): ?>
-                            <div class="yrr-empty-slot" tabindex="0"></div>
+                            <div class="yrr-empty-slot" tabindex="0" aria-label="<?php echo esc_attr(__('Create new reservation', 'yrr')); ?>"></div>
                         <?php else: foreach($slots as $r): ?>
                             <div class="yrr-reservation-block yrr-status-<?php echo esc_attr($r->status ?? 'pending'); ?>"
                                 data-reservation-id="<?php echo esc_attr($r->id); ?>">
@@ -98,4 +98,3 @@ $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
         </div>
     </div>
 </div>
-//
