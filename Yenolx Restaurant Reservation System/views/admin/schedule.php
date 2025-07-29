@@ -1,35 +1,35 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// 1. Target date for grid (from ?date= param or today)
+// 1. Get the selected date (from URL ?date=, or today)
 $chosen_date = isset($_GET['date']) ? sanitize_text_field($_GET['date']) : date('Y-m-d');
 
 // 2. Load all tables
 $tables = class_exists('YRR_Tables_Model') ? YRR_Tables_Model::get_all() : array();
 
-// 3. Get open/close times (from Hours Model or default)
+// 3. Get open/close times (from Hours Model, fallback 09:00-23:00)
 if (class_exists('YRR_Hours_Model')) {
     $dayname = date('l', strtotime($chosen_date));
     $hours = YRR_Hours_Model::get_hours_for_day($dayname);
     $open  = ($hours && !empty($hours->open_time))  ? $hours->open_time  : '09:00';
     $close = ($hours && !empty($hours->close_time)) ? $hours->close_time : '23:00';
 } else {
-    $open  = '09:00';
-    $close = '23:00';
+    $open = '09:00';
+    $close= '23:00';
 }
 
-// 4. Slot length in minutes (from settings)
+// 4. Slot duration (in minutes, from settings)
 $slot_duration = (class_exists('YRR_Settings_Model') && method_exists('YRR_Settings_Model', 'get_setting'))
     ? intval(YRR_Settings_Model::get_setting('slot_duration'))
-    : 60; // Default 60 minutes
+    : 60; // default 60min
 
-// 5. Build slot list
+// 5. Generate slot list (array of 'H:i')
 $slots = [];
 for ($t = strtotime($open); $t < strtotime($close); $t += $slot_duration * 60) {
     $slots[] = date('H:i', $t);
 }
 
-// 6. Only load reservations for selected day (fixes memory bug!)
+// 6. LOAD ONLY THIS DAY's RESERVATIONS! (Fixes memory bug)
 $reservations = class_exists('YRR_Reservation_Model')
     ? YRR_Reservation_Model::get_all(
         9999, 0, [
@@ -39,10 +39,9 @@ $reservations = class_exists('YRR_Reservation_Model')
       )
     : array();
 
-// 7. Index reservations for quick lookup: [table_id][slot_time] = reservation
+// 7. Index reservations for grid: [table_id][slot_time] = reservation
 $res_map = [];
 foreach ($reservations as $r) {
-    // Defensive: ensure table_id present
     if (!empty($r->table_id)) {
         $slot_time = date('H:i', strtotime($r->reservation_time));
         $res_map[$r->table_id][$slot_time] = $r;
