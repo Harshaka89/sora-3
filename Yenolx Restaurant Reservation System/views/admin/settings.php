@@ -30,7 +30,7 @@ $slot_options = [
     120 => '2 hours',
     180 => '3 hours',
 ];
-?>
+
 <div class="wrap">
   <div style="max-width:650px;margin:28px auto;background:#fff;border-radius:15px;padding:33px 35px;box-shadow:0 5px 30px rgba(0,0,0,.09);">
     <h1 style="margin-top:0;color:#2c3e50;font-size:1.5rem;text-align:center;">⚙️ Reservation System Settings</h1>
