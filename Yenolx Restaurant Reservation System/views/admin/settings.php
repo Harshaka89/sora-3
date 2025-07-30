@@ -1,4 +1,77 @@
+
+
+
 <?php
+if (!defined('ABSPATH')) exit;
+
+// Form save logic (Controller, simplified)
+if (!empty($_POST['save_settings']) && wp_verify_nonce($_POST['settings_nonce'], 'yrr_settings_action')) {
+    YRR_Settings_Model::set('slot_duration',       sanitize_text_field($_POST['slot_duration']));
+    YRR_Settings_Model::set('open_days',           $_POST['open_days']); // array
+    YRR_Settings_Model::set('open_time',           sanitize_text_field($_POST['open_time']));
+    YRR_Settings_Model::set('close_time',          sanitize_text_field($_POST['close_time']));
+    YRR_Settings_Model::set('reservation_enabled', !empty($_POST['reservation_enabled']) ? 1 : 0);
+    // ...add any other settings
+    echo '<div class="notice notice-success"><p>Settings updated.</p></div>';
+}
+// Load initial state (Model)
+$duration      = YRR_Settings_Model::get('slot_duration', 60);
+$open_days     = YRR_Settings_Model::get('open_days', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
+$open_time     = YRR_Settings_Model::get('open_time', '09:00');
+$close_time    = YRR_Settings_Model::get('close_time', '22:00');
+$resv_enabled  = (int) YRR_Settings_Model::get('reservation_enabled', 1);
+
+$slot_options = [
+    15  => '15 minutes',
+    20  => '20 minutes',
+    30  => '30 minutes',
+    60  => '1 hour',
+    90  => '1.5 hours',
+    120 => '2 hours',
+    180 => '3 hours',
+];
+?>
+<div class="wrap">
+  <div style="max-width:650px;margin:28px auto;background:#fff;border-radius:15px;padding:33px 35px;box-shadow:0 5px 30px rgba(0,0,0,.09);">
+    <h1 style="margin-top:0;color:#2c3e50;font-size:1.5rem;text-align:center;">⚙️ Reservation System Settings</h1>
+    <form method="post">
+      <?php wp_nonce_field('yrr_settings_action','settings_nonce'); ?>
+      <div style="margin-bottom:31px;">
+        <label style="font-weight:700;font-size:1.12em;">Time Slot Duration</label>
+        <select name="slot_duration" style="width:100%;padding:13px;margin-top:4px;border-radius:7px;">
+          <?php foreach ($slot_options as $minutes => $label): ?>
+          <option value="<?php echo esc_attr($minutes); ?>" <?php selected($duration, $minutes); ?>><?php echo $label; ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div style="margin-bottom:29px;">
+        <label style="font-weight:700;font-size:1.12em;">Restaurant Open Days</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:4px;">
+          <?php foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $wd): ?>
+          <label style="font-weight:600;">
+            <input type="checkbox" name="open_days[]" value="<?php echo $wd; ?>" <?php checked(in_array($wd, $open_days)); ?>> <?php echo $wd; ?>
+          </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <div style="margin-bottom:27px;">
+        <label style="font-weight:700;font-size:1.12em;">Opening Hour</label>
+        <input type="time" name="open_time" value="<?php echo esc_attr($open_time); ?>" style="width:46%;padding:7px;margin-right:13px;border-radius:7px;">
+        <label style="font-weight:700;font-size:1.12em;">Closing Hour</label>
+        <input type="time" name="close_time" value="<?php echo esc_attr($close_time); ?>" style="width:46%;padding:7px;border-radius:7px;">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-weight:700;font-size:1.12em;"><input type="checkbox" name="reservation_enabled" value="1" <?php checked($resv_enabled,1); ?>> Reservations Enabled</label>
+        <p style="color:#777;font-size:0.98em;margin:4px 0 0 2px;">Turn off to temporarily disable ALL reservations everywhere.</p>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" name="save_settings" value="1" style="background:linear-gradient(135deg,#007cba 0%,#ffc107 100%);color:white;font-weight:700;padding:13px 40px;border:none;border-radius:7px;font-size:1.08em;">💾 Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 if (!defined('ABSPATH')) exit;
 
 // 1. Define settings fields (add more as needed)
@@ -172,3 +245,4 @@ if (!empty($_POST['settings_nonce']) && wp_verify_nonce($_POST['settings_nonce']
         </form>
     </div>
 </div>
+
