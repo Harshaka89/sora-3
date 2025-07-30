@@ -1,4 +1,19 @@
 <?php
+
+
+
+$date = $_POST['reservation_date'] ?? date('Y-m-d');
+$slots = yrr_generate_time_slots($date);
+?>
+<select name="reservation_time" required>
+  <?php foreach ($slots as $slot): ?>
+    <option value="<?php echo esc_attr($slot); ?>"><?php echo esc_html($slot); ?></option>
+  <?php endforeach; ?>
+</select>
+
+
+
+
 if (!defined('ABSPATH')) exit;
 $reservations = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::get_all() : array();
 ?>
