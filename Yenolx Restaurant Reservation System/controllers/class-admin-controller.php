@@ -30,15 +30,18 @@ class YRR_Admin_Controller {
      * This acts as a router for various admin actions.
      */
     public function handle_form_submissions() {
-        if (empty($_POST['action']) || !current_user_can('manage_options')) {
+        // Check for both POST and GET actions
+        if (empty($_REQUEST['action']) || !current_user_can('manage_options')) {
             return;
         }
 
+        $action = sanitize_key($_REQUEST['action']);
+
         // Route to the correct handler based on the submitted form action
-        switch ($_POST['action']) {
+        switch ($action) {
             case 'yrr_add_table':
             case 'yrr_edit_table':
-                if (check_admin_referer('yrr_' . $_POST['action'] . '_nonce')) {
+                if (check_admin_referer('yrr_' . $action . '_nonce')) {
                     $this->save_table();
                 }
                 break;
@@ -49,17 +52,77 @@ class YRR_Admin_Controller {
                 break;
             case 'yrr_add_location':
             case 'yrr_edit_location':
-                if (check_admin_referer('yrr_' . $_POST['action'] . '_nonce')) {
+                if (check_admin_referer('yrr_' . $action . '_nonce')) {
                     $this->save_location();
                 }
                 break;
             case 'yrr_add_coupon':
             case 'yrr_edit_coupon':
-                if (check_admin_referer('yrr_' . $_POST['action'] . '_nonce')) {
+                if (check_admin_referer('yrr_' . $action . '_nonce')) {
                     $this->save_coupon();
                 }
                 break;
+            case 'yrr_export_reservations':
+                if (isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field($_GET['_wpnonce']), 'yrr_export_nonce')) {
+                    $this->handle_csv_export();
+                }
+                break;
         }
+    }
+
+    /**
+     * [NEW] Handles the logic for exporting reservations to a CSV file.
+     */
+    private function handle_csv_export() {
+        $filters = array(
+            'status' => isset($_GET['status']) ? sanitize_text_field($_GET['status']) : null,
+            'search' => isset($_GET['s']) ? sanitize_text_field($_GET['s']) : null,
+        );
+
+        // Fetch all reservations (with no limit) that match the current filters
+        $reservations = YRR_Reservation_Model::get_all(array_merge($filters, ['limit' => -1, 'offset' => 0]));
+
+        if (empty($reservations)) {
+            wp_die('No reservations to export based on the current filters.');
+        }
+
+        $filename = 'reservations-export-' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+
+        // Add CSV headers
+        fputcsv($output, array(
+            'Reservation Code',
+            'Customer Name',
+            'Customer Email',
+            'Date',
+            'Time',
+            'Party Size',
+            'Table Number',
+            'Status',
+            'Special Requests'
+        ));
+
+        // Add data rows
+        foreach ($reservations as $reservation) {
+            fputcsv($output, array(
+                $reservation->reservation_code,
+                $reservation->customer_name,
+                $reservation->customer_email,
+                $reservation->reservation_date,
+                $reservation->reservation_time,
+                $reservation->party_size,
+                $reservation->table_number ?? 'N/A',
+                ucfirst($reservation->status),
+                $reservation->special_requests
+            ));
+        }
+
+        fclose($output);
+        exit;
     }
 
     /**
