@@ -33,22 +33,15 @@ jQuery(document).ready(function($) {
         } else {
             row.removeClass('yrr-day-closed');
         }
-    }).trigger('change'); // Trigger on page load to set initial state
+    }).trigger('change');
 
 
     // --- Weekly Calendar View ---
 
-    // Check if the calendar container exists on the current page
     const calendarEl = document.getElementById('yrr-calendar-wrapper');
     if (calendarEl) {
         // NOTE: This section requires a calendar library like FullCalendar.js
-        // You would typically enqueue the library's JS and CSS files first.
-        
-        // Placeholder message until a library is integrated
-        $(calendarEl).html('<div class="yrr-placeholder-content"><p><strong>Calendar functionality requires integration with a JavaScript library like FullCalendar.js.</strong></p><p>Once integrated, this area will display an interactive weekly schedule.</p></div>');
-        
-        /*
-        // --- EXAMPLE FullCalendar.js Integration ---
+        // For this example, we assume FullCalendar.js is loaded.
         
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'timeGridWeek',
@@ -57,6 +50,10 @@ jQuery(document).ready(function($) {
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
+            editable: true, // Make events draggable
+            droppable: true, // Allow events to be dropped
+
+            // Fetch events from our AJAX endpoint
             events: function(fetchInfo, successCallback, failureCallback) {
                 $.ajax({
                     url: yrr_admin.ajax_url,
@@ -76,13 +73,40 @@ jQuery(document).ready(function($) {
                     }
                 });
             },
-            eventClick: function(info) {
-                // Handle click on a reservation event (e.g., open a modal)
-                alert('Reservation ID: ' + info.event.id + '\\nCustomer: ' + info.event.title);
+
+            // ** NEW: Handle the drag-and-drop event **
+            eventDrop: function(info) {
+                if (!confirm(yrr_admin.strings.confirm_reschedule)) {
+                    info.revert(); // Revert the change if the user cancels
+                    return;
+                }
+
+                $.ajax({
+                    url: yrr_admin.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'yrr_update_reservation_time',
+                        nonce: yrr_admin.nonce,
+                        reservation_id: info.event.id,
+                        new_date: info.event.start.toISOString().slice(0, 10),
+                        new_time: info.event.start.toTimeString().slice(0, 8)
+                    },
+                    success: function(response) {
+                        if (!response.success) {
+                            alert(yrr_admin.strings.error);
+                            info.revert(); // Revert if the server-side update fails
+                        }
+                    },
+                    error: function() {
+                        alert(yrr_admin.strings.error);
+                        info.revert();
+                    }
+                });
             },
-            dateClick: function(info) {
-                // Handle click on a date/time slot (e.g., open 'add reservation' modal)
-                alert('Clicked on: ' + info.dateStr);
+
+            eventClick: function(info) {
+                // Future enhancement: Open a modal to edit details
+                alert('Reservation ID: ' + info.event.id + '\\nCustomer: ' + info.event.title);
             }
         });
 
@@ -92,7 +116,6 @@ jQuery(document).ready(function($) {
         $('#yrr-calendar-prev').on('click', () => calendar.prev());
         $('#yrr-calendar-today').on('click', () => calendar.today());
         $('#yrr-calendar-next').on('click', () => calendar.next());
-        */
     }
 
 });
