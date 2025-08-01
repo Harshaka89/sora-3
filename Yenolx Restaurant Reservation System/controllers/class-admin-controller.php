@@ -71,7 +71,7 @@ class YRR_Admin_Controller {
     }
 
     /**
-     * [NEW] Handles the logic for exporting reservations to a CSV file.
+     * Handles the logic for exporting reservations to a CSV file.
      */
     private function handle_csv_export() {
         $filters = array(
@@ -79,7 +79,6 @@ class YRR_Admin_Controller {
             'search' => isset($_GET['s']) ? sanitize_text_field($_GET['s']) : null,
         );
 
-        // Fetch all reservations (with no limit) that match the current filters
         $reservations = YRR_Reservation_Model::get_all(array_merge($filters, ['limit' => -1, 'offset' => 0]));
 
         if (empty($reservations)) {
@@ -93,31 +92,16 @@ class YRR_Admin_Controller {
 
         $output = fopen('php://output', 'w');
 
-        // Add CSV headers
         fputcsv($output, array(
-            'Reservation Code',
-            'Customer Name',
-            'Customer Email',
-            'Date',
-            'Time',
-            'Party Size',
-            'Table Number',
-            'Status',
-            'Special Requests'
+            'Reservation Code', 'Customer Name', 'Customer Email', 'Date', 'Time',
+            'Party Size', 'Table Number', 'Status', 'Special Requests'
         ));
 
-        // Add data rows
         foreach ($reservations as $reservation) {
             fputcsv($output, array(
-                $reservation->reservation_code,
-                $reservation->customer_name,
-                $reservation->customer_email,
-                $reservation->reservation_date,
-                $reservation->reservation_time,
-                $reservation->party_size,
-                $reservation->table_number ?? 'N/A',
-                ucfirst($reservation->status),
-                $reservation->special_requests
+                $reservation->reservation_code, $reservation->customer_name, $reservation->customer_email,
+                $reservation->reservation_date, $reservation->reservation_time, $reservation->party_size,
+                $reservation->table_number ?? 'N/A', ucfirst($reservation->status), $reservation->special_requests
             ));
         }
 
@@ -139,11 +123,11 @@ class YRR_Admin_Controller {
         register_setting('yrr_settings_group_booking', 'yrr_settings_booking', array('sanitize_callback' => array($this, 'sanitize_booking_settings')));
         add_settings_section('yrr_booking_section', __('Booking Rules', 'yrr'), null, 'yrr-settings-booking');
         add_settings_field('yrr_max_party_size', __('Maximum Party Size', 'yrr'), array($this, 'render_text_field'), 'yrr-settings-booking', 'yrr_booking_section', ['name' => 'max_party_size', 'type' => 'number', 'group' => 'booking', 'default' => 12]);
-        add_settings_field('yrr_slot_duration', __('Slot Duration (in minutes)', 'yrr'), array($this, 'render_text_field'), 'yrr-settings-booking', 'yrr_booking_section', ['name' => 'slot_duration', 'type' => 'number', 'group' => 'booking', 'default' => 60]);
+        add_settings_field('yrr_slot_duration', __('Slot Duration (minutes)', 'yrr'), array($this, 'render_text_field'), 'yrr-settings-booking', 'yrr_booking_section', ['name' => 'slot_duration', 'type' => 'number', 'group' => 'booking', 'default' => 60]);
         add_settings_field('yrr_reservations_enabled', __('Enable All Reservations', 'yrr'), array($this, 'render_checkbox_field'), 'yrr-settings-booking', 'yrr_booking_section', ['name' => 'reservations_enabled', 'group' => 'booking', 'default' => 1]);
     }
 
-    // --- RENDER & SANITIZE METHODS FOR SETTINGS API ---
+    // --- RENDER & SANITIZE METHODS ---
 
     public function render_text_field($args) {
         $options = get_option('yrr_settings_' . $args['group']);
@@ -175,7 +159,7 @@ class YRR_Admin_Controller {
         return $sanitized_input;
     }
 
-    // --- SAVE METHODS FOR CUSTOM FORM SUBMISSIONS ---
+    // --- SAVE METHODS ---
 
     private function save_table() {
         $data = ['table_number' => sanitize_text_field($_POST['table_number']), 'capacity' => absint($_POST['capacity']), 'location' => sanitize_text_field($_POST['location'])];
