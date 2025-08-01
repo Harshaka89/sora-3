@@ -257,6 +257,49 @@ final class YenolxRestaurantReservation {
     public function __wakeup() { _doing_it_wrong(__FUNCTION__, 'Unserializing instances is forbidden.', YRR_VERSION); }
 }
 
+    // ... inside the YenolxRestaurantReservation class ...
+
+    /**
+     * Renders the dashboard page and loads its data.
+     */
+    public function dashboard_page() {
+        // Fetch statistics from the model
+        $stats = YRR_Reservation_Model::get_dashboard_stats();
+
+        // Load the view file and pass the data to it
+        $this->load_admin_view('dashboard', 'Dashboard', ['stats' => $stats]);
+    }
+
+    /**
+     * Dynamically loads the view for each admin page.
+     */
+    public function __call($name, $arguments) {
+        if (strpos($name, '_page') !== false) {
+            $view = str_replace('_page', '', $name);
+            // Pass an empty data array by default for other pages
+            $this->load_admin_view($view, ucfirst($view));
+        }
+    }
+    
+    /**
+     * Load admin view file or show a placeholder.
+     * This function is now updated to accept data.
+     */
+    private function load_admin_view($view, $title, $data = array()) {
+        // Make variables from the data array available to the view file
+        extract($data);
+        
+        $file = YRR_PLUGIN_PATH . 'views/admin/' . $view . '.php';
+        if (file_exists($file)) {
+            include $file;
+        } else {
+            // ... existing placeholder code ...
+        }
+    }
+
+    // ... rest of the main plugin file ...
+
+
 /**
  * Get the main plugin instance
  * @return YenolxRestaurantReservation
