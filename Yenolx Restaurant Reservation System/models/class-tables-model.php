@@ -16,9 +16,6 @@ class YRR_Tables_Model {
 
     /**
      * Get a single table by its ID.
-     *
-     * @param int $id The ID of the table.
-     * @return object|null The table object, or null if not found.
      */
     public static function get_by_id($id) {
         global $wpdb;
@@ -27,9 +24,6 @@ class YRR_Tables_Model {
 
     /**
      * Get all tables with optional filters.
-     *
-     * @param array $args Filtering arguments.
-     * @return array An array of table objects.
      */
     public static function get_all($args = array()) {
         global $wpdb;
@@ -60,6 +54,7 @@ class YRR_Tables_Model {
     
     /**
      * Get the total count of tables for a specific location.
+     * THIS IS THE NEW, REQUIRED FUNCTION.
      *
      * @param int $location_id The ID of the location.
      * @return int The number of tables.
@@ -71,17 +66,11 @@ class YRR_Tables_Model {
 
     /**
      * Get available tables based on party size and time.
-     *
-     * @param int    $party_size The number of guests.
-     * @param string $date The reservation date.
-     * @param string $time The reservation time.
-     * @return array An array of available table objects.
      */
     public static function get_available_by_capacity($party_size, $date, $time) {
         global $wpdb;
         $reservations_table = YRR_RESERVATIONS_TABLE;
         
-        // Find tables that are already booked for the given date and time
         $booked_tables_sql = $wpdb->prepare(
             "SELECT table_id FROM $reservations_table WHERE reservation_date = %s AND reservation_time = %s AND status IN ('confirmed', 'pending') AND table_id IS NOT NULL",
             $date, $time
@@ -104,9 +93,6 @@ class YRR_Tables_Model {
 
     /**
      * Create a new table.
-     *
-     * @param array $data The data for the new table.
-     * @return int|false The new table ID on success, false on failure.
      */
     public static function create($data) {
         global $wpdb;
@@ -115,10 +101,6 @@ class YRR_Tables_Model {
 
     /**
      * Update an existing table.
-     *
-     * @param int   $id   The ID of the table to update.
-     * @param array $data The new data for the table.
-     * @return bool True on success, false on failure.
      */
     public static function update($id, $data) {
         global $wpdb;
@@ -127,9 +109,6 @@ class YRR_Tables_Model {
 
     /**
      * Delete a table.
-     *
-     * @param int $id The ID of the table to delete.
-     * @return bool True on success, false on failure.
      */
     public static function delete($id) {
         global $wpdb;
