@@ -1,164 +1,111 @@
 <?php
 /**
- * Settings Model - Handles all plugin settings and configuration
+ * Settings Model for Yenolx Restaurant Reservation System
+ *
+ * This class handles all data operations for plugin settings, providing a
+ * standardized way to get and set configuration options.
+ *
+ * @package YRR/Models
+ * @since 1.6.0
  */
 
 if (!defined('ABSPATH')) {
-    exit('Direct access forbidden.');
+    exit; // Exit if accessed directly.
 }
 
 class YRR_Settings_Model {
-    
+
     /**
-     * Cache for settings
+     * Internal cache for settings to reduce database queries.
+     * @var array
      */
     private static $cache = array();
-    
+
     /**
-     * Get a setting value
+     * Get a single setting value from the database.
+     *
+     * @param string $key     The option key to retrieve.
+     * @param mixed  $default The default value to return if the key is not found.
+     * @return mixed The value of the setting.
      */
-    public static function get_setting($key, $default = null) {
+    public static function get_setting($key, $default = false) {
         // Check cache first
         if (isset(self::$cache[$key])) {
             return self::$cache[$key];
         }
-        
+
         global $wpdb;
-        
         $value = $wpdb->get_var($wpdb->prepare(
             "SELECT setting_value FROM " . YRR_SETTINGS_TABLE . " WHERE setting_key = %s",
             $key
         ));
-        
+
         if ($value !== null) {
             $value = maybe_unserialize($value);
-            self::$cache[$key] = $value;
+            self::$cache[$key] = $value; // Store in cache
             return $value;
         }
-        
+
         return $default;
     }
-    
+
     /**
-     * Set a setting value
+     * Set (add or update) a single setting value.
+     *
+     * @param string $key   The option key to set.
+     * @param mixed  $value The value to store.
+     * @return bool True on success, false on failure.
      */
     public static function set_setting($key, $value) {
         global $wpdb;
-        
+
         $result = $wpdb->replace(
             YRR_SETTINGS_TABLE,
             array(
-                'setting_key' => $key,
+                'setting_key'   => $key,
                 'setting_value' => maybe_serialize($value),
-                'autoload' => 1
             ),
-            array('%s', '%s', '%d')
+            array('%s', '%s')
         );
-        
+
         // Update cache
         if ($result !== false) {
             self::$cache[$key] = $value;
         }
-        
+
         return $result !== false;
     }
     
     /**
-     * Get multiple settings
-     */
-    public static function get_settings($keys) {
-        $settings = array();
-        
-        foreach ($keys as $key) {
-            $settings[$key] = self::get_setting($key);
-        }
-        
-        return $settings;
-    }
-    
-    /**
-     * Get all settings
-     */
-    public static function get_all_settings() {
-        global $wpdb;
-        
-        $results = $wpdb->get_results(
-            "SELECT setting_key, setting_value FROM " . YRR_SETTINGS_TABLE . " WHERE autoload = 1",
-            ARRAY_A
-        );
-        
-        $settings = array();
-        
-        foreach ($results as $row) {
-            $settings[$row['setting_key']] = maybe_unserialize($row['setting_value']);
-        }
-        
-        // Update cache
-        self::$cache = array_merge(self::$cache, $settings);
-        
-        return $settings;
-    }
-    
-    /**
-     * Delete a setting
-     */
-    public static function delete_setting($key) {
-        global $wpdb;
-        
-        $result = $wpdb->delete(
-            YRR_SETTINGS_TABLE,
-            array('setting_key' => $key),
-            array('%s')
-        );
-        
-        // Remove from cache
-        if (isset(self::$cache[$key])) {
-            unset(self::$cache[$key]);
-        }
-        
-        return $result !== false;
-    }
-    
-    /**
-     * Get restaurant information
-     */
-    public static function get_restaurant_info() {
-        return array(
-            'name' => self::get_setting('restaurant_name', get_bloginfo('name')),
-            'email' => self::get_setting('restaurant_email', get_option('admin_email')),
-            'phone' => self::get_setting('restaurant_phone', ''),
-            'address' => self::get_setting('restaurant_address', ''),
-            'timezone' => self::get_setting('timezone', get_option('timezone_string') ?: 'UTC')
-        );
-    }
-    
-    /**
-     * Get booking rules
+     * Get a predefined group of settings related to booking rules.
+     *
+     * @return array An array of all booking rule settings.
      */
     public static function get_booking_rules() {
         return array(
-            'max_party_size' => self::get_setting('max_party_size', 12),
-            'min_party_size' => self::get_setting('min_party_size', 1),
-            'slot_duration' => self::get_setting('slot_duration', 60),
-            'advance_booking_days' => self::get_setting('advance_booking_days', 30),
-            'booking_buffer_hours' => self::get_setting('booking_buffer_hours', 2),
-            'edit_cutoff_hours' => self::get_setting('edit_cutoff_hours', 2),
-            'auto_confirm' => self::get_setting('auto_confirm', 0)
+            'max_party_size'        => self::get_setting('max_party_size', 12),
+            'min_party_size'        => self::get_setting('min_party_size', 1),
+            'slot_duration'         => self::get_setting('slot_duration', 60),
+            'advance_booking_days'  => self::get_setting('advance_booking_days', 30),
+            'booking_buffer_hours'  => self::get_setting('booking_buffer_hours', 2),
+            'auto_confirm'          => self::get_setting('auto_confirm', 0),
+            'reservations_enabled'  => self::get_setting('reservations_enabled', 1),
+            'dynamic_pricing_enabled' => self::get_setting('dynamic_pricing_enabled', 0),
         );
     }
     
     /**
-     * Get email settings
+     * Get a predefined group of settings related to restaurant info.
+     *
+     * @return array An array of all restaurant info settings.
      */
-    public static function get_email_settings() {
+    public static function get_restaurant_info() {
         return array(
-            'enabled' => self::get_setting('email_enabled', 1),
-            'from_name' => self::get_setting('email_from_name', get_bloginfo('name')),
-            'from_address' => self::get_setting('email_from_address', get_option('admin_email')),
-            'confirmation_subject' => self::get_setting('confirmation_email_subject', 'Reservation Confirmation - #{reservation_code}'),
-            'reminder_enabled' => self::get_setting('reminder_email_enabled', 1),
-            'reminder_hours' => self::get_setting('reminder_email_hours', 24),
-            'cancellation_enabled' => self::get_setting('cancellation_email_enabled', 1)
+            'name'      => self::get_setting('restaurant_name', get_bloginfo('name')),
+            'email'     => self::get_setting('restaurant_email', get_option('admin_email')),
+            'phone'     => self::get_setting('restaurant_phone', ''),
+            'address'   => self::get_setting('restaurant_address', ''),
+            'timezone'  => self::get_setting('timezone', get_option('timezone_string') ?: 'UTC'),
         );
     }
 }

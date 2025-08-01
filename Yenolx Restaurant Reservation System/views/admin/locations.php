@@ -1,117 +1,118 @@
 <?php
-if (!defined('ABSPATH')) exit;
+/**
+ * Locations Management View for Yenolx Restaurant Reservation System
+ *
+ * This file renders the interface for adding, editing, and managing multiple
+ * restaurant locations or branches.
+ *
+ * @package YRR/Views
+ * @since 1.6.0
+ */
 
-// ADD location
-if (!empty($_POST['add_location']) && wp_verify_nonce($_POST['location_nonce'], 'yrr_location_action')) {
-    $data = [
-        'name'  => sanitize_text_field($_POST['location_name']),
-        'label' => sanitize_text_field($_POST['label']),
-        'notes' => sanitize_textarea_field($_POST['notes'])
-    ];
-    if (class_exists('YRR_Locations_Model')) YRR_Locations_Model::create($data);
-    wp_redirect(admin_url('admin.php?page=yrr-locations&message=loc_added')); exit;
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
-// EDIT location
-if (!empty($_POST['update_location']) && wp_verify_nonce($_POST['location_nonce'], 'yrr_location_action')) {
-    $id = intval($_POST['location_id']);
-    $data = [
-        'name'  => sanitize_text_field($_POST['location_name']),
-        'label' => sanitize_text_field($_POST['label']),
-        'notes' => sanitize_textarea_field($_POST['notes'])
-    ];
-    if ($id && class_exists('YRR_Locations_Model')) YRR_Locations_Model::update($id, $data);
-    wp_redirect(admin_url('admin.php?page=yrr-locations&message=loc_updated')); exit;
+
+// Ensure the necessary model is available
+if (!class_exists('YRR_Locations_Model')) {
+    echo '<div class="notice notice-error"><p>Error: The Locations Model is missing and locations cannot be displayed.</p></div>';
+    return;
 }
-// DELETE
-if (isset($_GET['delete_location']) && check_admin_referer('yrr_location_action')) {
-    $id = intval($_GET['delete_location']);
-    if ($id && class_exists('YRR_Locations_Model')) YRR_Locations_Model::delete($id);
-    wp_redirect(admin_url('admin.php?page=yrr-locations&message=loc_deleted')); exit;
+
+// Handle form submissions for adding/editing a location
+$edit_location = null;
+if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['location_id'])) {
+    $edit_location = YRR_Locations_Model::get_by_id(intval($_GET['location_id']));
 }
-$locations = class_exists('YRR_Locations_Model') ? YRR_Locations_Model::get_all() : [];
+
+// Fetch all locations to display in the list
+$all_locations = YRR_Locations_Model::get_all();
+
 ?>
-<div class="wrap">
-  <div style="max-width:1180px;margin:22px auto 25px auto;background:white;padding:13px 0 16px 0;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08);">
-    <div style="text-align:center;margin-bottom:6px;padding-bottom:10px;border-bottom:2px solid #ffc107;">
-      <h1 style="font-size:1.53rem;color:#2c3e50;padding:0 0 2px 0;margin:0;">🏢 Locations &amp; Dining Areas</h1>
-      <p style="color:#6c757d;margin:2px 0 0;font-size:0.92rem;">Manage all dining areas, patios, zones for table assignments</p>
+
+<div class="wrap yrr-locations">
+    <h1><?php _e('Locations Management', 'yrr'); ?></h1>
+    <p class="yrr-page-description"><?php _e('Manage all your restaurant branches. Each location can have its own tables and hours.', 'yrr'); ?></p>
+
+    <div id="col-container" class="wp-clearfix">
+
+        <!-- Left Column: Add/Edit Form -->
+        <div id="col-left">
+            <div class="col-wrap">
+                <div class="form-wrap">
+                    <h2><?php echo $edit_location ? __('Edit Location', 'yrr') : __('Add New Location', 'yrr'); ?></h2>
+                    <form method="post" action="">
+                        <input type="hidden" name="action" value="<?php echo $edit_location ? 'yrr_edit_location' : 'yrr_add_location'; ?>" />
+                        <input type="hidden" name="location_id" value="<?php echo esc_attr($edit_location->id ?? ''); ?>" />
+                        <?php wp_nonce_field($edit_location ? 'yrr_edit_location_nonce' : 'yrr_add_location_nonce'); ?>
+
+                        <div class="form-field">
+                            <label for="location_name"><?php _e('Location Name', 'yrr'); ?></label>
+                            <input type="text" name="name" id="location_name" value="<?php echo esc_attr($edit_location->name ?? ''); ?>" required />
+                            <p><?php _e('The name of the restaurant branch, e.g., "Downtown Bistro".', 'yrr'); ?></p>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="location_address"><?php _e('Address', 'yrr'); ?></label>
+                            <textarea name="address" id="location_address" rows="3"><?php echo esc_textarea($edit_location->address ?? ''); ?></textarea>
+                            <p><?php _e('The physical address of this location.', 'yrr'); ?></p>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="location_phone"><?php _e('Phone Number', 'yrr'); ?></label>
+                            <input type="text" name="phone" id="location_phone" value="<?php echo esc_attr($edit_location->phone ?? ''); ?>" />
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="location_email"><?php _e('Public Email', 'yrr'); ?></label>
+                            <input type="email" name="email" id="location_email" value="<?php echo esc_attr($edit_location->email ?? ''); ?>" />
+                        </div>
+
+                        <?php if ($edit_location) : ?>
+                            <?php submit_button(__('Update Location', 'yrr')); ?>
+                            <a href="?page=yrr-locations" class="button button-secondary"><?php _e('Cancel Edit', 'yrr'); ?></a>
+                        <?php else : ?>
+                            <?php submit_button(__('Add New Location', 'yrr')); ?>
+                        <?php endif; ?>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Locations List -->
+        <div id="col-right">
+            <div class="col-wrap">
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="manage-column column-primary"><?php _e('Location Name', 'yrr'); ?></th>
+                            <th scope="col" class="manage-column"><?php _e('Address', 'yrr'); ?></th>
+                            <th scope="col" class="manage-column"><?php _e('Tables', 'yrr'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($all_locations)) : ?>
+                            <?php foreach ($all_locations as $location) : ?>
+                                <tr>
+                                    <td class="column-primary">
+                                        <strong><?php echo esc_html($location->name); ?></strong>
+                                        <div class="row-actions">
+                                            <span class="edit"><a href="?page=yrr-locations&action=edit&location_id=<?php echo $location->id; ?>"><?php _e('Edit', 'yrr'); ?></a> | </span>
+                                            <span class="delete"><a href="#" class="submitdelete"><?php _e('Delete', 'yrr'); ?></a></span>
+                                        </div>
+                                    </td>
+                                    <td><?php echo esc_html($location->address); ?></td>
+                                    <td><?php echo esc_html(YRR_Tables_Model::get_count_by_location($location->id)); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <tr>
+                                <td colspan="3"><?php _e('No locations have been added yet.', 'yrr'); ?></td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <!-- Add Location Form -->
-    <div style="background:#fffbea;padding:13px 18px 7px 18px;border-radius:10px;margin:9px 22px 18px 22px;border:2px solid #ffc107;">
-      <form method="post">
-        <?php wp_nonce_field('yrr_location_action','location_nonce'); ?>
-        <input type="hidden" name="add_location" value="1">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-          <input type="text" name="location_name" required maxlength="30" placeholder="Location Name (e.g., Patio)" style="padding:8px 7px;border-radius:7px;border:1.5px solid #e9ecef;">
-          <input type="text" name="label" maxlength="15" placeholder="Short Label (optional)" style="padding:8px 7px;border-radius:7px;border:1.5px solid #e9ecef;">
-          <input type="text" name="notes" maxlength="32" placeholder="Notes (e.g., Smoking)" style="padding:8px 7px;border-radius:7px;border:1.5px solid #e9ecef;">
-        </div>
-        <div style="text-align:right;margin-top:7px;">
-          <button type="submit" class="button button-primary" style="padding:7px 23px;font-size:1.01em;border-radius:6px;">➕ Add Location</button>
-        </div>
-      </form>
-    </div>
-    <!-- Locations Card Grid (8 per row) -->
-    <div style="display:grid;grid-template-columns:repeat(8,minmax(104px,1fr));gap:8px;">
-      <?php foreach ($locations as $loc): ?>
-      <div style="background:#fff;border:2px solid #ffc107;border-radius:13px;padding:11px 3px 10px 6px;position:relative;min-height:88px;box-sizing:border-box;">
-        <div style="text-align:center;margin-bottom:2px;">
-          <span style="display:inline-block;font-size:1.19rem;font-weight:900;color:#e8a800;"><?php echo esc_html($loc->name); ?></span>
-        <?php if (!empty($loc->label)): ?>
-          <span style="display:inline-block;font-size:0.92em;background:#f3e542;color:#877200;padding:2px 9px;border-radius:9px;margin-left:5px;"><?php echo esc_html($loc->label); ?></span>
-        <?php endif;?>
-        </div>
-        <div style="font-size:0.95em;text-align:center;color:#363e52;margin-bottom:3px;word-break:break-all;"><?php echo esc_html($loc->notes); ?></div>
-        <div style="margin-top:4px;text-align:center;">
-          <button onclick="editLoc(<?php echo htmlspecialchars(json_encode($loc)); ?>)" type="button"
-            style="background:#ffc107;color:#333;border:none;padding:3px 8px;border-radius:7px;font-size:0.96em;font-weight:700;cursor:pointer;">✏️ Edit</button>
-          <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-locations&delete_location='.$loc->id), 'yrr_location_action'); ?>"
-             onclick="return confirm('Delete this location? This cannot be undone.')" 
-             style="background:#dc3545;color:white;padding:3px 8px;text-decoration:none;border-radius:7px;font-size:0.96em;font-weight:700;">
-            🗑️ Delete
-          </a>
-        </div>
-      </div>
-      <?php endforeach; ?>
-      <?php if (empty($locations)): ?>
-        <div style="padding:17px 7px;color:#6c757d;text-align:center;">No locations yet. Add your first above.</div>
-      <?php endif;?>
-    </div>
-  </div>
 </div>
-<!-- Edit Locations Modal -->
-<div id="editLocModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center;">
-  <div style="background:white;padding:17px 13px;border-radius:13px;width:95%;max-width:310px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
-      <h3 style="margin:0;font-size:1.14em;">✏️ Edit Location</h3>
-      <button onclick="closeLocModal()" style="background:none;border:none;font-size:16px;color:#6c757d;cursor:pointer;">×</button>
-    </div>
-    <form method="post">
-      <?php wp_nonce_field('yrr_location_action','location_nonce'); ?>
-      <input type="hidden" id="edit_location_id" name="location_id">
-      <input type="hidden" name="update_location" value="1">
-      <label>Name*<input type="text" id="edit_location_name" name="location_name" required style="width:97%;padding:6px;margin-bottom:5px;"></label>
-      <label>Label<input type="text" id="edit_label" name="label" style="width:97%;padding:6px;margin-bottom:5px;"></label>
-      <label>Notes<input type="text" id="edit_notes" name="notes" style="width:97%;padding:6px;margin-bottom:8px;"></label>
-      <div style="margin-top:8px;text-align:right;">
-        <button type="button" onclick="closeLocModal()" style="background:#6c757d;color:white;border:none;padding:7px 13px;border-radius:8px;margin-right:9px;">Cancel</button>
-        <button type="submit" style="background:linear-gradient(135deg,#ffc107 0%,#f3c200 100%);color:#222;border:none;padding:7px 13px;border-radius:8px;font-weight:700;">💾 Save</button>
-      </div>
-    </form>
-  </div>
-</div>
-<script>
-function editLoc(loc){
-    document.getElementById('edit_location_id').value = loc.id || '';
-    document.getElementById('edit_location_name').value = loc.name || '';
-    document.getElementById('edit_label').value = loc.label || '';
-    document.getElementById('edit_notes').value = loc.notes || '';
-    document.getElementById('editLocModal').style.display = 'flex';
-}
-function closeLocModal(){ document.getElementById('editLocModal').style.display='none'; }
-document.getElementById('editLocModal').addEventListener('click', function(e) { if (e.target === this) closeLocModal(); });
-</script>
-<style>
-@media (max-width:900px){div[style*="grid-template-columns:repeat(8,minmax(104px,1fr))"] {grid-template-columns:repeat(4,minmax(120px,1fr))!important;}}
-@media (max-width:600px){div[style*="grid-template-columns:repeat(8,minmax(104px,1fr))"] {grid-template-columns:repeat(2,minmax(140px,1fr))!important;}}
-</style>

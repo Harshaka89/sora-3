@@ -1,178 +1,133 @@
 <?php
-if (!defined('ABSPATH')) exit;
+/**
+ * Coupons Management View for Yenolx Restaurant Reservation System
+ *
+ * This file renders the interface for adding, editing, and deleting coupons.
+ *
+ * @package YRR/Views
+ * @since 1.6.0
+ */
 
-// ADD coupon
-if (!empty($_POST['add_coupon']) && wp_verify_nonce($_POST['coupon_nonce'], 'yrr_coupon_action')) {
-    $data = [
-        'code'           => strtoupper(sanitize_text_field($_POST['code'])),
-        'discount_type'  => sanitize_text_field($_POST['discount_type']),
-        'discount_value' => floatval($_POST['discount_value']),
-        'minimum_amount' => floatval($_POST['minimum_amount']),
-        'usage_limit'    => intval($_POST['usage_limit']),
-        'valid_from'     => sanitize_text_field($_POST['valid_from']),
-        'valid_to'       => sanitize_text_field($_POST['valid_to']),
-        'is_active'      => !empty($_POST['is_active']) ? 1 : 0,
-    ];
-    if (class_exists('YRR_Coupons_Model')) YRR_Coupons_Model::create($data);
-    wp_redirect(admin_url('admin.php?page=yrr-coupons&message=coupon_added')); exit;
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
-// EDIT coupon
-if (!empty($_POST['update_coupon']) && wp_verify_nonce($_POST['coupon_nonce'], 'yrr_coupon_action')) {
-    $id = intval($_POST['coupon_id']);
-    $data = [
-        'code'           => strtoupper(sanitize_text_field($_POST['code'])),
-        'discount_type'  => sanitize_text_field($_POST['discount_type']),
-        'discount_value' => floatval($_POST['discount_value']),
-        'minimum_amount' => floatval($_POST['minimum_amount']),
-        'usage_limit'    => intval($_POST['usage_limit']),
-        'valid_from'     => sanitize_text_field($_POST['valid_from']),
-        'valid_to'       => sanitize_text_field($_POST['valid_to']),
-        'is_active'      => !empty($_POST['is_active']) ? 1 : 0,
-    ];
-    if ($id && class_exists('YRR_Coupons_Model')) YRR_Coupons_Model::update($id, $data);
-    wp_redirect(admin_url('admin.php?page=yrr-coupons&message=coupon_updated')); exit;
+
+// Ensure the necessary model is available
+if (!class_exists('YRR_Coupons_Model')) {
+    echo '<div class="notice notice-error"><p>Error: The Coupons Model is missing and coupons cannot be displayed.</p></div>';
+    return;
 }
-// DELETE coupon
-if (isset($_GET['delete_coupon']) && check_admin_referer('yrr_coupon_action')) {
-    $id = intval($_GET['delete_coupon']);
-    if ($id && class_exists('YRR_Coupons_Model')) YRR_Coupons_Model::delete($id);
-    wp_redirect(admin_url('admin.php?page=yrr-coupons&message=coupon_deleted')); exit;
+
+// Handle form submissions for adding/editing a coupon
+$edit_coupon = null;
+if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['coupon_id'])) {
+    $edit_coupon = YRR_Coupons_Model::get_by_id(intval($_GET['coupon_id']));
 }
-// Fetch coupons
-$coupons = class_exists('YRR_Coupons_Model') ? YRR_Coupons_Model::get_all() : [];
-function yrr_coupon_status_badge($c) {
-    if (!$c->is_active) return ['#6c757d', 'Inactive'];
-    $now = current_time('mysql');
-    if (!empty($c->valid_to) && $c->valid_to < $now) return ['#dc3545', 'Expired'];
-    if ($c->usage_limit > 0 && $c->usage_count >= $c->usage_limit) return ['#ffc107', 'Used Up'];
-    return ['#28a745', 'Active'];
-}
+
+// Fetch all coupons to display in the list
+$all_coupons = YRR_Coupons_Model::get_all();
+
 ?>
-<div class="wrap">
-  <div style="max-width:1440px;margin:24px auto 24px auto;background:white;padding:21px 0 21px 0;border-radius:18px;box-shadow:0 7px 22px rgba(0,0,0,0.09);">
-    <div style="text-align:center;margin-bottom:12px;padding-bottom:16px;border-bottom:3px solid #ffc107;">
-      <h1 style="font-size:2rem;color:#2c3e50;margin:0;">🎟️ Discount Coupons & Promotions</h1>
-      <p style="color:#6c757d;margin:4px 0 0;font-size:1.08rem;">Create, edit, and manage all your coupons. Big, bold, and beautifully responsive—6 per row!</p>
+
+<div class="wrap yrr-coupons">
+    <h1><?php _e('Coupons & Promotions', 'yrr'); ?></h1>
+    <p class="yrr-page-description"><?php _e('Create and manage discount codes to offer to your customers.', 'yrr'); ?></p>
+
+    <div id="col-container" class="wp-clearfix">
+
+        <!-- Left Column: Add/Edit Form -->
+        <div id="col-left">
+            <div class="col-wrap">
+                <div class="form-wrap">
+                    <h2><?php echo $edit_coupon ? __('Edit Coupon', 'yrr') : __('Add New Coupon', 'yrr'); ?></h2>
+                    <form method="post" action="">
+                        <input type="hidden" name="action" value="<?php echo $edit_coupon ? 'yrr_edit_coupon' : 'yrr_add_coupon'; ?>" />
+                        <input type="hidden" name="coupon_id" value="<?php echo esc_attr($edit_coupon->id ?? ''); ?>" />
+                        <?php wp_nonce_field($edit_coupon ? 'yrr_edit_coupon_nonce' : 'yrr_add_coupon_nonce'); ?>
+
+                        <div class="form-field">
+                            <label for="coupon_code"><?php _e('Coupon Code', 'yrr'); ?></label>
+                            <input type="text" name="code" id="coupon_code" value="<?php echo esc_attr($edit_coupon->code ?? ''); ?>" required style="text-transform:uppercase" />
+                            <p><?php _e('The code customers will enter. e.g., "SUMMER10".', 'yrr'); ?></p>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="discount_type"><?php _e('Discount Type', 'yrr'); ?></label>
+                            <select name="discount_type" id="discount_type">
+                                <option value="percentage" <?php selected($edit_coupon->discount_type ?? 'percentage', 'percentage'); ?>><?php _e('Percentage', 'yrr'); ?></option>
+                                <option value="fixed" <?php selected($edit_coupon->discount_type ?? '', 'fixed'); ?>><?php _e('Fixed Amount', 'yrr'); ?></option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="discount_value"><?php _e('Discount Value', 'yrr'); ?></label>
+                            <input type="number" name="discount_value" id="discount_value" value="<?php echo esc_attr($edit_coupon->discount_value ?? ''); ?>" step="0.01" required />
+                            <p><?php _e('The numeric value of the discount (e.g., 10 for 10% or $10).', 'yrr'); ?></p>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label for="expiry_date"><?php _e('Expiry Date (Optional)', 'yrr'); ?></label>
+                            <input type="date" name="valid_to" id="expiry_date" value="<?php echo esc_attr($edit_coupon ? date('Y-m-d', strtotime($edit_coupon->valid_to)) : ''); ?>" />
+                            <p><?php _e('The last day the coupon is valid.', 'yrr'); ?></p>
+                        </div>
+
+                        <?php if ($edit_coupon) : ?>
+                            <?php submit_button(__('Update Coupon', 'yrr')); ?>
+                            <a href="?page=yrr-coupons" class="button button-secondary"><?php _e('Cancel Edit', 'yrr'); ?></a>
+                        <?php else : ?>
+                            <?php submit_button(__('Add New Coupon', 'yrr')); ?>
+                        <?php endif; ?>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Coupons List -->
+        <div id="col-right">
+            <div class="col-wrap">
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="manage-column column-primary"><?php _e('Code', 'yrr'); ?></th>
+                            <th scope="col" class="manage-column"><?php _e('Discount', 'yrr'); ?></th>
+                            <th scope="col" class="manage-column"><?php _e('Usage', 'yrr'); ?></th>
+                            <th scope="col" class="manage-column"><?php _e('Status', 'yrr'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($all_coupons)) : ?>
+                            <?php foreach ($all_coupons as $coupon) : ?>
+                                <tr>
+                                    <td class="column-primary">
+                                        <strong><?php echo esc_html($coupon->code); ?></strong>
+                                        <div class="row-actions">
+                                            <span class="edit"><a href="?page=yrr-coupons&action=edit&coupon_id=<?php echo $coupon->id; ?>"><?php _e('Edit', 'yrr'); ?></a> | </span>
+                                            <span class="delete"><a href="#" class="submitdelete"><?php _e('Delete', 'yrr'); ?></a></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <?php if ($coupon->discount_type === 'percentage') : ?>
+                                            <?php echo esc_html($coupon->discount_value); ?>%
+                                        <?php else : ?>
+                                            <?php echo '$' . esc_html(number_format($coupon->discount_value, 2)); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo esc_html($coupon->usage_count); ?> / <?php echo $coupon->usage_limit ? esc_html($coupon->usage_limit) : '&infin;'; ?></td>
+                                    <td>
+                                        <span class="yrr-status-badge <?php echo $coupon->is_active ? 'yrr-status-confirmed' : 'yrr-status-cancelled'; ?>">
+                                            <?php echo $coupon->is_active ? __('Active', 'yrr') : __('Inactive', 'yrr'); ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <tr>
+                                <td colspan="4"><?php _e('No coupons have been created yet.', 'yrr'); ?></td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <!-- Add Coupon Form -->
-    <div style="background:#fffbea;padding:18px 22px 13px 22px;border-radius:13px;margin:10px 40px 22px 40px;border:2px solid #ffc107;">
-      <form method="post">
-        <?php wp_nonce_field('yrr_coupon_action','coupon_nonce'); ?>
-        <input type="hidden" name="add_coupon" value="1">
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">
-          <input type="text" name="code" placeholder="Code*" maxlength="20" required style="padding:14px 12px;font-size:1.14em;border-radius:9px;border:1.5px solid #e9ecef;">
-          <select name="discount_type" style="padding:14px 12px;font-size:1.13em;border-radius:9px;border:1.5px solid #e9ecef;">
-            <option value="percentage">Percent (%)</option>
-            <option value="fixed">Fixed Amount</option>
-          </select>
-          <input type="number" step="0.01" name="discount_value" min="0.01" placeholder="Value*" required style="padding:14px 12px;font-size:1.15em;border-radius:9px;border:1.5px solid #e9ecef;">
-          <input type="number" step="0.01" name="minimum_amount" min="0" placeholder="Min Order" style="padding:14px 12px;font-size:1.11em;border-radius:9px;border:1.5px solid #e9ecef;">
-          <input type="number" name="usage_limit" min="0" placeholder="Limit (0=∞)" style="padding:14px 12px;font-size:1.10em;border-radius:9px;border:1.5px solid #e9ecef;">
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:13px;">
-          <input type="date" name="valid_from" style="padding:12px 13px;font-size:1.09em;border-radius:9px;border:1.5px solid #e9ecef;">
-          <input type="date" name="valid_to" style="padding:12px 13px;font-size:1.09em;border-radius:9px;border:1.5px solid #e9ecef;">
-          <label style="font-size:1em;color:#248d6a;display:flex;align-items:center;gap:10px;">
-            <input type="checkbox" name="is_active" value="1" checked style="margin:0 7px 0 0;transform:scale(1.24);"> Active
-          </label>
-        </div>
-        <div style="text-align:right;margin-top:15px;">
-          <button type="submit" class="button button-primary" style="padding:13px 40px;font-size:1.18em;border-radius:8px;font-weight:600;">➕ Add Coupon</button>
-        </div>
-      </form>
-    </div>
-    <!-- Coupons Grid: 6 per row, big cards -->
-    <div style="display:grid;grid-template-columns:repeat(6,minmax(185px,1fr));gap:22px;">
-      <?php foreach ($coupons as $c): list($badge,$label)=yrr_coupon_status_badge($c); ?>
-      <div style="background:white;border:2px solid #ffc107;border-radius:15px;padding:20px 14px 16px 14px;position:relative;min-height:115px;box-sizing:border-box;">
-        <div style="text-align:center;margin-bottom:8px;">
-          <span style="display:inline-block;font-size:1.32rem;font-weight:900;color:#ffc107;"><?php echo esc_html($c->code); ?></span>
-        </div>
-        <div style="text-align:center;font-size:1.1rem;margin-bottom:4px;">
-          <?php echo esc_html($c->discount_type==='fixed' ? '$'.number_format($c->discount_value,2) : $c->discount_value.'%'); ?>
-        </div>
-        <div style="text-align:center;font-size:0.97rem;">
-          <?php echo $c->usage_limit > 0 ? "Used: $c->usage_count/$c->usage_limit" : "Unlimited"; ?>
-        </div>
-        <div style="text-align:center;font-size:0.97rem;">
-          <?php echo !empty($c->valid_to) ? "Expiry: ".date('Y-m-d',strtotime($c->valid_to)) : "No expiry"; ?>
-        </div>
-        <div style="margin:5px 0 0;text-align:center;">
-          <span style="background:<?php echo $badge;?>;color:#fff;padding:5px 14px;border-radius:12px;font-size:0.99rem;font-weight:700;"><?php echo $label; ?></span>
-        </div>
-        <div style="margin-top:11px;text-align:center;">
-          <button onclick="editCoupon(<?php echo htmlspecialchars(json_encode($c)); ?>)" type="button"
-            style="background:#ffc107;color:#333;border:none;padding:6px 14px;border-radius:8px;font-size:1em;font-weight:700;cursor:pointer;">✏️ Edit</button>
-          <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-coupons&delete_coupon='.$c->id), 'yrr_coupon_action'); ?>"
-             onclick="return confirm('Delete this coupon? This cannot be undone.')" 
-             style="background:#dc3545;color:white;padding:6px 14px;text-decoration:none;border-radius:8px;font-size:1em;font-weight:700;">
-            🗑️ Delete
-          </a>
-        </div>
-      </div>
-      <?php endforeach; ?>
-      <?php if (empty($coupons)): ?>
-        <div style="padding:35px 15px;color:#6c757d;text-align:center;">No coupons yet. Add your first above.</div>
-      <?php endif;?>
-    </div>
-  </div>
 </div>
-<!-- Edit Coupon Modal -->
-<div id="editCouponModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center;">
-  <div style="background:white;padding:23px 15px;border-radius:16px;width:95%;max-width:370px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;">
-      <h3 style="margin:0;font-size:1.09em;">✏️ Edit Coupon</h3>
-      <button onclick="closeCouponModal()" style="background:none;border:none;font-size:17px;color:#6c757d;cursor:pointer;">×</button>
-    </div>
-    <form method="post">
-      <?php wp_nonce_field('yrr_coupon_action','coupon_nonce'); ?>
-      <input type="hidden" id="edit_coupon_id" name="coupon_id">
-      <input type="hidden" name="update_coupon" value="1">
-      <input type="text" id="edit_code" name="code" required style="width:97%;padding:9px;margin-bottom:8px;font-size:1.04em;" maxlength="20">
-      <select id="edit_discount_type" name="discount_type" style="width:99%;padding:9px;font-size:1.01em;">
-        <option value="percentage">Percentage</option>
-        <option value="fixed">Fixed Amount</option>
-      </select>
-      <input type="number" step="0.01" id="edit_discount_value" name="discount_value" min="0.01" required style="width:97%;padding:9px;margin-bottom:8px;">
-      <input type="number" step="0.01" id="edit_minimum_amount" name="minimum_amount" min="0" style="width:97%;padding:9px;margin-bottom:8px;">
-      <input type="number" id="edit_usage_limit" name="usage_limit" min="0" style="width:97%;padding:9px;margin-bottom:8px;">
-      <input type="date" id="edit_valid_from" name="valid_from" style="width:97%;padding:9px;margin-bottom:8px;">
-      <input type="date" id="edit_valid_to" name="valid_to" style="width:97%;padding:9px;margin-bottom:8px;">
-      <label style="font-size:0.97em;color:#248d6a;display:flex;align-items:center;gap:8px;">
-        <input type="checkbox" id="edit_is_active" name="is_active" value="1" style="transform:scale(1.15);margin:0 8px 0 0;">
-        Active
-      </label>
-      <div style="margin-top:13px;text-align:right;">
-        <button type="button" onclick="closeCouponModal()" style="background:#6c757d;color:white;border:none;padding:7px 15px;border-radius:9px;margin-right:10px;">Cancel</button>
-        <button type="submit" style="background:linear-gradient(135deg,#ffc107 0%,#17a2b8 100%);color:#222;border:none;padding:7px 15px;border-radius:9px;font-weight:700;">💾 Save</button>
-      </div>
-    </form>
-  </div>
-</div>
-<script>
-function editCoupon(c){
-    document.getElementById('edit_coupon_id').value = c.id || '';
-    document.getElementById('edit_code').value = c.code || '';
-    document.getElementById('edit_discount_type').value = c.discount_type || 'percentage';
-    document.getElementById('edit_discount_value').value = c.discount_value || '';
-    document.getElementById('edit_minimum_amount').value = c.minimum_amount || '';
-    document.getElementById('edit_usage_limit').value = c.usage_limit || 0;
-    document.getElementById('edit_valid_from').value = c.valid_from ? c.valid_from.substring(0,10):'';
-    document.getElementById('edit_valid_to').value = c.valid_to ? c.valid_to.substring(0,10):'';
-    document.getElementById('edit_is_active').checked = c.is_active == 1;
-    document.getElementById('editCouponModal').style.display = 'flex';
-}
-function closeCouponModal(){ document.getElementById('editCouponModal').style.display='none'; }
-document.getElementById('editCouponModal').addEventListener('click', function(e) { if (e.target === this) closeCouponModal(); });
-</script>
-<style>
-@media (max-width:1400px){
-  div[style*="grid-template-columns:repeat(6"] {grid-template-columns:repeat(3,minmax(210px,1fr)) !important;}
-}
-@media (max-width:900px){
-  div[style*="grid-template-columns:repeat(6"] {grid-template-columns:repeat(2,minmax(200px,1fr)) !important;}
-}
-@media (max-width:600px){
-  div[style*="grid-template-columns:repeat(6"] {grid-template-columns:repeat(1,minmax(210px,1fr)) !important;}
-}
-</style>
