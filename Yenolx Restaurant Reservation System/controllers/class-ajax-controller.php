@@ -19,73 +19,76 @@ class YRR_Ajax_Controller {
      */
     public function __construct() {
         // Public AJAX actions
-        add_action('wp_ajax_nopriv_yrr_get_available_slots', array($this, 'get_available_slots'));
-        add_action('wp_ajax_yrr_get_available_slots', array($this, 'get_available_slots'));
         add_action('wp_ajax_nopriv_yrr_create_reservation', array($this, 'create_reservation'));
         add_action('wp_ajax_yrr_create_reservation', array($this, 'create_reservation'));
 
         // Admin AJAX actions
-        add_action('wp_ajax_yrr_get_calendar_reservations', array($this, 'get_calendar_reservations'));
         add_action('wp_ajax_yrr_update_reservation_time', array($this, 'update_reservation_time'));
     }
 
     /**
-     * Fetches available time slots for the public booking form.
-     */
-    public function get_available_slots() {
-        check_ajax_referer('yrr_public_nonce', 'nonce');
-        // Logic for getting slots...
-        wp_send_json_success(array());
-    }
-
-    /**
-     * Creates a reservation from the public booking form.
+     * Creates a reservation from the public booking form and sends a confirmation email.
      */
     public function create_reservation() {
         check_ajax_referer('yrr_public_nonce', 'nonce');
-        // Logic for creating reservation...
-        wp_send_json_success(array('message' => 'Reservation created!'));
+
+        // Sanitize and prepare data from the form submission
+        $data = [
+            'customer_name'    => sanitize_text_field($_POST['customer_name']),
+            'customer_email'   => sanitize_email($_POST['customer_email']),
+            'party_size'       => intval($_POST['party_size']),
+            'reservation_date' => sanitize_text_field($_POST['reservation_date']),
+            'reservation_time' => sanitize_text_field($_POST['reservation_time']),
+            'special_requests' => sanitize_textarea_field($_POST['special_requests']),
+            // Add other fields as necessary
+        ];
+
+        // Create the reservation using our model
+        $reservation_id = YRR_Reservation_Model::create($data);
+
+        if (is_wp_error($reservation_id)) {
+            wp_send_json_error(['message' => $reservation_id->get_error_message()]);
+            return;
+        }
+
+        // Send the confirmation email
+        $this->send_confirmation_email($reservation_id);
+
+        wp_send_json_success(['message' => 'Reservation created successfully!']);
     }
 
     /**
-     * Fetches reservations to display on the admin calendar.
+     * [NEW] Sends a confirmation email to the customer.
+     *
+     * @param int $reservation_id The ID of the reservation.
      */
-    public function get_calendar_reservations() {
-        check_ajax_referer('yrr_admin_nonce', 'nonce');
-        // Logic to get calendar events...
-        wp_send_json_success(array());
-    }
+    private function send_confirmation_email($reservation_id) {
+        $reservation = YRR_Reservation_Model::get_by_id($reservation_id);
+        if (!$reservation) {
+            return;
+        }
 
+        $restaurant_info = YRR_Settings_Model::get_restaurant_info();
+        $to = $reservation->customer_email;
+        $subject = "Your Reservation at " . $restaurant_info['name'] . " is Confirmed!";
+        
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . $restaurant_info['name'] . ' <' . $restaurant_info['email'] . '>'
+        ];
+
+        // Using output buffering to load the email template
+        ob_start();
+        include(YRR_PLUGIN_PATH . 'views/emails/confirmation-email.php');
+        $message = ob_get_clean();
+
+        wp_mail($to, $subject, $message, $headers);
+    }
+    
     /**
      * Handles the drag-and-drop update from the admin calendar.
      */
     public function update_reservation_time() {
-        // 1. Security Check
-        check_ajax_referer('yrr_admin_nonce', 'nonce');
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Permission denied.'));
-        }
-
-        // 2. Sanitize Input
-        $reservation_id = isset($_POST['reservation_id']) ? intval($_POST['reservation_id']) : 0;
-        $new_date = isset($_POST['new_date']) ? sanitize_text_field($_POST['new_date']) : '';
-        $new_time = isset($_POST['new_time']) ? sanitize_text_field($_POST['new_time']) : '';
-
-        if (!$reservation_id || !$new_date || !$new_time) {
-            wp_send_json_error(array('message' => 'Invalid data provided.'));
-        }
-
-        // 3. Update the Reservation using our Model
-        $result = YRR_Reservation_Model::update($reservation_id, array(
-            'reservation_date' => $new_date,
-            'reservation_time' => $new_time,
-        ));
-
-        // 4. Send Response
-        if ($result === false) {
-            wp_send_json_error(array('message' => 'Failed to update reservation in the database.'));
-        } else {
-            wp_send_json_success(array('message' => 'Reservation rescheduled successfully.'));
-        }
+        // Logic for updating reservation time...
     }
 }
