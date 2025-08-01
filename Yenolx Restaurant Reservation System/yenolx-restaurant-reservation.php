@@ -110,6 +110,7 @@ final class YenolxRestaurantReservation {
         if (is_admin()) {
             add_action('admin_menu', array($this, 'admin_menu'));
             add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
+            add_action('wp_enqueue_scripts', array($this, 'public_scripts'));
             add_action('admin_notices', array($this, 'admin_notices'));
         }
     }
@@ -185,6 +186,17 @@ final class YenolxRestaurantReservation {
     }
 
     /**
+     * Renders the dashboard page and loads its data.
+     */
+    public function dashboard_page() {
+        $stats = [];
+        if (class_exists('YRR_Reservation_Model')) {
+            $stats = YRR_Reservation_Model::get_dashboard_stats();
+        }
+        $this->load_admin_view('dashboard', 'Dashboard', ['stats' => $stats]);
+    }
+
+    /**
      * Dynamically loads the view for each admin page.
      */
     public function __call($name, $arguments) {
@@ -197,15 +209,13 @@ final class YenolxRestaurantReservation {
     /**
      * Load admin view file or show a placeholder.
      */
-    private function load_admin_view($view, $title) {
+    private function load_admin_view($view, $title, $data = array()) {
+        extract($data);
         $file = YRR_PLUGIN_PATH . 'views/admin/' . $view . '.php';
         if (file_exists($file)) {
             include $file;
         } else {
-            echo '<div class="wrap">';
-            echo '<h1>' . esc_html($title) . '</h1>';
-            echo '<div class="notice notice-info"><p>' . sprintf(__('The view file for %s is missing. Please create it at %s.', 'yrr'), '<code>' . $title . '</code>', '<code>' . $file . '</code>') . '</p></div>';
-            echo '</div>';
+            echo '<div class="wrap"><h1>' . esc_html($title) . '</h1><div class="notice notice-info"><p>' . sprintf(__('The view file for %s is missing. Please create it at %s.', 'yrr'), '<code>' . $title . '</code>', '<code>' . $file . '</code>') . '</p></div></div>';
         }
     }
     
@@ -214,28 +224,24 @@ final class YenolxRestaurantReservation {
      */
     public function admin_scripts($hook) {
         if (strpos($hook, 'yrr-') === false) return;
+        wp_enqueue_style('yrr-admin', YRR_PLUGIN_URL . 'assets/css/admin.css', array(), YRR_VERSION);
+        wp_enqueue_script('yrr-admin', YRR_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), YRR_VERSION, true);
+        wp_localize_script('yrr-admin', 'yrr_admin_ajax', array('ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('yrr_admin_nonce')));
+    }
 
-        wp_enqueue_style('yrr-admin', YRR_PLUGIN_URL . 'assets/admin.css', array(), YRR_VERSION);
-        wp_enqueue_script('yrr-admin', YRR_PLUGIN_URL . 'assets/admin.js', array('jquery'), YRR_VERSION, true);
-
-        wp_localize_script('yrr-admin', 'yrr_admin', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'rest_url' => rest_url('yrr/v1/'),
-            'nonce'    => wp_create_nonce('yrr_admin_nonce'),
-            'strings'  => array(
-                'confirm_delete' => __('Are you sure you want to delete this item?', 'yrr'),
-                'loading'        => __('Loading...', 'yrr'),
-                'error'          => __('An error occurred. Please try again.', 'yrr'),
-                'success'        => __('Operation completed successfully.', 'yrr'),
-            )
-        ));
+    /**
+     * Enqueue public scripts and styles.
+     */
+    public function public_scripts() {
+        wp_enqueue_style('yrr-public', YRR_PLUGIN_URL . 'assets/css/public.css', array(), YRR_VERSION);
+        wp_enqueue_script('yrr-public', YRR_PLUGIN_URL . 'assets/js/public.js', array('jquery'), YRR_VERSION, true);
+        wp_localize_script('yrr-public', 'yrr_public_ajax', array('ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('yrr_public_nonce')));
     }
     
     /**
      * Display admin notices
      */
     public function admin_notices() {
-        // Version checks
         if (version_compare(PHP_VERSION, '8.1', '<')) {
             echo '<div class="notice notice-error"><p><strong>Yenolx Reservations:</strong> ' . sprintf(__('This plugin requires PHP 8.1 or higher. You are running PHP %s.', 'yrr'), PHP_VERSION) . '</p></div>';
         }
@@ -255,50 +261,8 @@ final class YenolxRestaurantReservation {
     // Prevent cloning and unserializing
     public function __clone() { _doing_it_wrong(__FUNCTION__, 'Cloning is forbidden.', YRR_VERSION); }
     public function __wakeup() { _doing_it_wrong(__FUNCTION__, 'Unserializing instances is forbidden.', YRR_VERSION); }
-}
 
-    // ... inside the YenolxRestaurantReservation class ...
-
-    /**
-     * Renders the dashboard page and loads its data.
-     */
-    public function dashboard_page() {
-        // Fetch statistics from the model
-        $stats = YRR_Reservation_Model::get_dashboard_stats();
-
-        // Load the view file and pass the data to it
-        $this->load_admin_view('dashboard', 'Dashboard', ['stats' => $stats]);
-    }
-
-    /**
-     * Dynamically loads the view for each admin page.
-     */
-    public function __call($name, $arguments) {
-        if (strpos($name, '_page') !== false) {
-            $view = str_replace('_page', '', $name);
-            // Pass an empty data array by default for other pages
-            $this->load_admin_view($view, ucfirst($view));
-        }
-    }
-    
-    /**
-     * Load admin view file or show a placeholder.
-     * This function is now updated to accept data.
-     */
-    private function load_admin_view($view, $title, $data = array()) {
-        // Make variables from the data array available to the view file
-        extract($data);
-        
-        $file = YRR_PLUGIN_PATH . 'views/admin/' . $view . '.php';
-        if (file_exists($file)) {
-            include $file;
-        } else {
-            // ... existing placeholder code ...
-        }
-    }
-
-    // ... rest of the main plugin file ...
-
+} // ** THIS IS THE IMPORTANT CLOSING BRACE THAT WAS LIKELY MISSING **
 
 /**
  * Get the main plugin instance
