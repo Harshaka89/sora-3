@@ -1,10 +1,10 @@
 <?php
 /**
- * Settings View for Yenolx Restaurant Reservation System
+ * Admin Controller for Yenolx Restaurant Reservation System
  *
- * This file renders the main settings page with multiple tabs.
+ * This class manages all admin-side pages, registers settings, and handles form submissions.
  *
- * @package YRR/Views
+ * @package YRR/Controllers
  * @since 1.6.0
  */
 
@@ -12,32 +12,77 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-// Determine the active tab
-$active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'general';
-?>
+class YRR_Admin_Controller {
 
-<div class="wrap yrr-settings-page">
-    <h1><?php _e('Restaurant Settings', 'yrr'); ?></h1>
-    <p class="yrr-page-description"><?php _e('Configure the core settings for your reservation system.', 'yrr'); ?></p>
+    public function __construct() {
+        add_action('admin_init', array($this, 'register_settings'));
+        
+        // This hook is designed to handle form submissions posted to admin-post.php
+        add_action('admin_post_yrr_add_table', array($this, 'save_table'));
+        add_action('admin_post_yrr_edit_table', array($this, 'save_table'));
+        add_action('admin_post_yrr_save_hours', array($this, 'save_hours'));
+        // Add similar lines for locations, coupons, etc.
+    }
 
-    <!-- Settings Tabs Navigation -->
-    <h2 class="nav-tab-wrapper">
-        <a href="?page=yrr-settings&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>"><?php _e('General', 'yrr'); ?></a>
-        <a href="?page=yrr-settings&tab=booking" class="nav-tab <?php echo $active_tab == 'booking' ? 'nav-tab-active' : ''; ?>"><?php _e('Booking Rules', 'yrr'); ?></a>
-    </h2>
+    /**
+     * Registers all plugin settings.
+     */
+    public function register_settings() {
+        // ... all register_setting code from before ...
+    }
 
-    <form method="post" action="options.php">
-        <?php
-        // Output nonce, action, and option_page fields for the active tab
-        if ($active_tab == 'general') {
-            settings_fields('yrr_settings_group_general');
-            do_settings_sections('yrr-settings-general');
-        } elseif ($active_tab == 'booking') {
-            settings_fields('yrr_settings_group_booking');
-            do_settings_sections('yrr-settings-booking');
+    /**
+     * Handles saving a table (both create and update).
+     */
+    public function save_table() {
+        if (!current_user_can('manage_options')) {
+            wp_die('You do not have permission to perform this action.');
+        }
+
+        $action = $_POST['action'];
+        check_admin_referer($action . '_nonce');
+
+        $data = [
+            'table_number' => sanitize_text_field($_POST['table_number']),
+            'capacity'     => absint($_POST['capacity']),
+            'location'     => sanitize_text_field($_POST['location']),
+        ];
+
+        if ($action === 'yrr_edit_table') {
+            $table_id = absint($_POST['table_id']);
+            YRR_Tables_Model::update($table_id, $data);
+        } else {
+            YRR_Tables_Model::create($data);
+        }
+
+        // Redirect back to the tables page with a success message
+        wp_redirect(admin_url('admin.php?page=yrr-tables&success=1'));
+        exit;
+    }
+
+    /**
+     * Handles saving operating hours.
+     */
+    public function save_hours() {
+        if (!current_user_can('manage_options')) {
+            wp_die('You do not have permission to perform this action.');
         }
         
-        submit_button();
-        ?>
-    </form>
-</div>
+        check_admin_referer('yrr_save_hours_nonce', 'yrr_hours_nonce');
+
+        foreach ($_POST['hours'] as $day => $data) {
+            YRR_Hours_Model::update_hours(absint($data['id']), [
+                'is_closed'   => absint($data['is_closed']),
+                'open_time'   => sanitize_text_field($data['open_time']),
+                'close_time'  => sanitize_text_field($data['close_time']),
+                'break_start' => sanitize_text_field($data['break_start']),
+                'break_end'   => sanitize_text_field($data['break_end'])
+            ]);
+        }
+        
+        wp_redirect(admin_url('admin.php?page=yrr-hours&success=1'));
+        exit;
+    }
+    
+    // ... other controller methods like render_field, sanitize_settings, etc.
+}
