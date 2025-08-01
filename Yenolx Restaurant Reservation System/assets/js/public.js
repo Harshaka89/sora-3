@@ -1,8 +1,8 @@
 /**
  * Public JavaScript for Yenolx Restaurant Reservation System
  *
- * This file handles the interactivity of the public-facing booking form,
- * including AJAX calls for time slots and form submission.
+ * This file handles the interactivity of the public-facing booking form
+ * and the "My Reservations" portal.
  *
  * @package YRR/Assets
  * @since 1.6.0
@@ -10,105 +10,59 @@
 
 jQuery(document).ready(function($) {
 
-    const form = $('#yrr-booking-form');
-    const dateInput = $('#yrr-date');
-    const partySizeInput = $('#yrr-party-size');
-    const timeSlotGroup = $('#yrr-time-slot-group');
-    const timeSlotContainer = $('#yrr-time-slots');
-    const selectedTimeInput = $('#yrr-selected-time');
-    const customerDetails = $('#yrr-customer-details');
-    const submitButton = $('#yrr-submit-booking');
-    const messages = $('#yrr-form-messages');
+    // --- Booking Form Logic ---
+    const bookingForm = $('#yrr-booking-form');
+    if (bookingForm.length) {
+        // All the logic for the booking form from before...
+    }
 
-    // --- Step 1: Fetch available time slots ---
 
-    function fetchTimeSlots() {
-        const date = dateInput.val();
-        const partySize = partySizeInput.val();
+    // --- [NEW] My Reservations Portal Logic ---
+    const lookupForm = $('#yrr-lookup-form');
+    if (lookupForm.length) {
+        const resultsContainer = $('#yrr-my-reservations-results');
 
-        if (!date || !partySize) {
-            return;
-        }
+        lookupForm.on('submit', function(e) {
+            e.preventDefault();
 
-        // Show loading state
-        timeSlotGroup.show();
-        timeSlotContainer.html('<p class="yrr-loading-slots">' + yrr_public_ajax.strings.loading + '</p>');
-        customerDetails.hide();
-        submitButton.prop('disabled', true);
-
-        $.ajax({
-            url: yrr_public_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'yrr_get_available_slots',
-                nonce: yrr_public_ajax.nonce,
-                date: date,
-                party_size: partySize
-            },
-            success: function(response) {
-                if (response.success && response.data.length > 0) {
-                    let slotsHtml = '';
-                    response.data.forEach(function(slot) {
-                        slotsHtml += '<div class="yrr-time-slot" data-time="' + slot.value + '">' + slot.label + '</div>';
-                    });
-                    timeSlotContainer.html(slotsHtml);
-                } else {
-                    timeSlotContainer.html('<p class="yrr-no-slots">' + yrr_public_ajax.strings.no_slots + '</p>');
-                }
-            },
-            error: function() {
-                timeSlotContainer.html('<p class="yrr-no-slots">' + yrr_public_ajax.strings.error + '</p>');
+            const email = $('#yrr-lookup-email').val();
+            if (!email) {
+                resultsContainer.html('<p class="yrr-error">Please enter an email address.</p>');
+                return;
             }
+
+            // Show a loading message
+            resultsContainer.html('<p class="yrr-loading">Searching for your reservations...</p>');
+
+            $.ajax({
+                url: yrr_public_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'yrr_get_my_reservations',
+                    nonce: yrr_public_ajax.nonce,
+                    email: email
+                },
+                success: function(response) {
+                    if (response.success && response.data.length > 0) {
+                        let html = '<ul>';
+                        response.data.forEach(function(booking) {
+                            html += `<li>
+                                <strong>Date:</strong> ${booking.reservation_date} at ${booking.reservation_time}<br>
+                                <strong>Party Size:</strong> ${booking.party_size}<br>
+                                <strong>Status:</strong> <span class="yrr-status-${booking.status}">${booking.status}</span>
+                            </li>`;
+                        });
+                        html += '</ul>';
+                        resultsContainer.html(html);
+                    } else {
+                        resultsContainer.html('<p>No reservations found for that email address.</p>');
+                    }
+                },
+                error: function() {
+                    resultsContainer.html('<p class="yrr-error">An error occurred. Please try again.</p>');
+                }
+            });
         });
     }
 
-    // Fetch slots when date or party size changes
-    dateInput.on('change', fetchTimeSlots);
-    partySizeInput.on('change', fetchTimeSlots);
-
-    // --- Step 2: Handle time slot selection ---
-
-    timeSlotContainer.on('click', '.yrr-time-slot', function() {
-        // Handle selection UI
-        $('.yrr-time-slot').removeClass('selected');
-        $(this).addClass('selected');
-
-        // Store selected time
-        selectedTimeInput.val($(this).data('time'));
-
-        // Show customer details and enable submit button
-        customerDetails.show();
-        submitButton.prop('disabled', false);
-    });
-
-    // --- Step 3: Handle final form submission ---
-
-    form.on('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading state on button
-        submitButton.prop('disabled', true).text(yrr_public_ajax.strings.loading);
-
-        $.ajax({
-            url: yrr_public_ajax.ajax_url,
-            type: 'POST',
-            data: form.serialize() + '&action=yrr_create_reservation&nonce=' + yrr_public_ajax.nonce,
-            success: function(response) {
-                if (response.success) {
-                    messages.removeClass('error').addClass('success').text(response.data.message).show();
-                    form[0].reset();
-                    customerDetails.hide();
-                    timeSlotContainer.html('<p class="yrr-loading-slots"><?php _e('Select a date and party size to see available times.', 'yrr'); ?></p>');
-                } else {
-                    messages.removeClass('success').addClass('error').text(response.data.message).show();
-                    submitButton.prop('disabled', false).text('Complete Reservation');
-                }
-            },
-            error: function() {
-                messages.removeClass('success').addClass('error').text(yrr_public_ajax.strings.error).show();
-                submitButton.prop('disabled', false).text('Complete Reservation');
-            }
-        });
-    });
 });
-//
