@@ -166,9 +166,10 @@ class YRR_Locations_Model {
             $where_sql = "WHERE is_active = 1";
         }
         
-        return $wpdb->get_results(
-            "SELECT * FROM " . YRR_LOCATIONS_TABLE . " $where_sql ORDER BY sort_order ASC, name ASC"
-        );
+        $sql = "SELECT * FROM " . YRR_LOCATIONS_TABLE . " $where_sql ORDER BY sort_order ASC, name ASC";
+        // Prepare is used even without dynamic parameters to enforce safe query construction
+        // and maintain consistency with WordPress database practices.
+        return $wpdb->get_results($wpdb->prepare($sql, []));
     }
     
     /**

@@ -82,8 +82,13 @@ class YRR_Settings_Model {
     public static function get_all_settings() {
         global $wpdb;
         
+        // Prepared statement ensures query safety and future-proofs against injection even
+        // when the current query uses only static values.
         $results = $wpdb->get_results(
-            "SELECT setting_key, setting_value FROM " . YRR_SETTINGS_TABLE . " WHERE autoload = 1",
+            $wpdb->prepare(
+                "SELECT setting_key, setting_value FROM " . YRR_SETTINGS_TABLE . " WHERE autoload = %d",
+                1
+            ),
             ARRAY_A
         );
         
