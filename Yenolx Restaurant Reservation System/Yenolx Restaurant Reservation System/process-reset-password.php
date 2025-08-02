@@ -36,6 +36,8 @@ try {
   $stmt->execute([$new_hashed, $user]);
 
   header("Location: reset-password.php?success=1");
+  exit;
 } catch (Exception $e) {
   header("Location: reset-password.php?error=Error: " . urlencode($e->getMessage()));
+  exit;
 }
