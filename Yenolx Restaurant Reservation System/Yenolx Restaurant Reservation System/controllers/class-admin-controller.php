@@ -26,23 +26,33 @@ class YRR_Admin_Controller {
 
 
     public function enqueue_admin_assets($hook) {
-        // error_log($hook); // Uncomment for debugging the right hook
-        if (strpos($hook, 'yrr-calendar') === false) {
+        // Only load assets on plugin pages
+        if (strpos($hook, 'yrr-') === false) {
             return;
         }
+
         wp_enqueue_style(
-            'yrr-calendar-admin',
-            YRR_PLUGIN_URL . 'assets/css/admin-calendar.css',
+            'yrr-admin',
+            YRR_PLUGIN_URL . 'assets/admin.css',
             array(),
             YRR_VERSION
         );
-        wp_enqueue_script(
-            'yrr-calendar-admin',
-            YRR_PLUGIN_URL . 'assets/js/admin-calendar.js',
-            array('jquery'),
-            YRR_VERSION,
-            true
-        );
+
+        if (strpos($hook, 'yrr-calendar') !== false) {
+            wp_enqueue_style(
+                'yrr-calendar-admin',
+                YRR_PLUGIN_URL . 'assets/css/admin-calendar.css',
+                array(),
+                YRR_VERSION
+            );
+            wp_enqueue_script(
+                'yrr-calendar-admin',
+                YRR_PLUGIN_URL . 'assets/js/admin-calendar.js',
+                array('jquery'),
+                YRR_VERSION,
+                true
+            );
+        }
     }
     
     /**
