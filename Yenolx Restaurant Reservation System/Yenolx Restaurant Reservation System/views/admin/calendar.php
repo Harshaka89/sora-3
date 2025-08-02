@@ -1,4 +1,5 @@
 
+
 <?php
 
 
@@ -12,7 +13,6 @@ if (!defined('ABSPATH')) { exit('Direct access forbidden.'); }
 
 // Ensure all dynamic output is properly escaped using WordPress helper functions.
 ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // Get week range
 $current_week = isset($_GET['week']) ? sanitize_text_field($_GET['week']) : date('Y-m-d');
