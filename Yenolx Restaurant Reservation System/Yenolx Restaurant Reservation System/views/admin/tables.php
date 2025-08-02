@@ -1,8 +1,11 @@
 <?php
-<?php include_once('../../includes/auth-check.php'); ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+include_once('../../includes/auth-check.php');
 
 if (!defined('ABSPATH')) exit;
+
+// Ensure all dynamic output is properly escaped using WordPress helper functions.
+?>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // Handle ADD
 if (!empty($_POST['add_table']) && wp_verify_nonce($_POST['table_nonce'], 'yrr_table_action')) {
@@ -85,22 +88,22 @@ function yrr_table_status_badge($status) {
       <?php foreach ($tables as $table): 
         $status = strtolower($table->status ?? 'available');
         list($bg, $txt, $icon) = yrr_table_status_badge($status); ?>
-      <div style="background:#fff;border:2px solid <?php echo $bg;?>;border-radius:11px;padding:6px 4px 7px 4px;position:relative;min-height:95px;box-sizing:border-box;">
+      <div style="background:#fff;border:2px solid <?php echo esc_attr( $bg ); ?>;border-radius:11px;padding:6px 4px 7px 4px;position:relative;min-height:95px;box-sizing:border-box;">
         <div class="table-status-badge"
              data-table="<?php echo esc_attr($table->id); ?>"
              data-status="<?php echo esc_attr($status); ?>"
              title="Click to change status"
-             style="position:absolute;top:-7px;right:7px;background:<?php echo $bg;?>;color:<?php echo $txt;?>;cursor:pointer;padding:4px 9px;border-radius:12px;font-size:1.19em;font-weight:700;box-shadow:0 2px 7px rgba(0,0,0,0.09);">
-            <?php echo $icon; ?>
+             style="position:absolute;top:-7px;right:7px;background:<?php echo esc_attr( $bg ); ?>;color:<?php echo esc_attr( $txt ); ?>;cursor:pointer;padding:4px 9px;border-radius:12px;font-size:1.19em;font-weight:700;box-shadow:0 2px 7px rgba(0,0,0,0.09);">
+            <?php echo esc_html( $icon ); ?>
         </div>
         <div style="text-align:center;">
           <span style="display:inline-block;font-size:1.35rem;font-weight:900;color:#222;margin-bottom:2px;"><?php echo esc_html($table->table_number); ?></span>
         </div>
         <div style="text-align:center;font-size:1.45em;line-height:1;margin-bottom:1px;">🍽️</div>
-        <div style="font-size:0.98em;text-align:center;color:#363e52;margin-bottom:1px;">👥 <span style="font-weight:600;"><?php echo intval($table->capacity); ?></span></div>
+        <div style="font-size:0.98em;text-align:center;color:#363e52;margin-bottom:1px;">👥 <span style="font-weight:600;"><?php echo esc_html( intval( $table->capacity ) ); ?></span></div>
         <div style="font-size:0.77em;text-align:center;color:#6c757d;"><?php echo esc_html($table->location); ?></div>
         <div style="margin-top:4px;text-align:center;">
-          <button onclick="editTable(<?php echo htmlspecialchars(json_encode($table)); ?>)" type="button"
+          <button onclick="editTable(<?php echo esc_js( wp_json_encode( $table ) ); ?>)" type="button"
             style="background:#17a2b8;color:white;border:none;padding:4px 10px 4px 10px;border-radius:6px;font-size:0.87em;font-weight:700;cursor:pointer;">
             ✏️ Edit
           </button>
@@ -167,7 +170,7 @@ jQuery(function($){
             yrr_table_status_change:1,
             table_id:tid,
             status:ns,
-            nonce:'<?php echo wp_create_nonce("yrr_table_ajax"); ?>'
+            nonce:'<?php echo esc_js( wp_create_nonce("yrr_table_ajax") ); ?>'
         }, function(resp){
             if(resp && resp.success) {
                 $badge.data('status', ns)

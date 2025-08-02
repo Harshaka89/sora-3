@@ -1,8 +1,11 @@
 <?php
-<?php include_once('../../includes/auth-check.php'); ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+include_once('../../includes/auth-check.php');
 
 if (!defined('ABSPATH')) exit;
+
+// Ensure all dynamic output is properly escaped using WordPress helper functions.
+?>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // 1. Get selected date (?date=..., or today)
 $current_date = isset($_GET['date']) ? sanitize_text_field($_GET['date']) : date('Y-m-d');
@@ -73,18 +76,18 @@ function yenolx_booking_color($status) {
         <!-- Header: Date Controls + Legend -->
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="font-size:2.0rem; color:#2c3e50;">📅 Table Schedule &amp; Time Slots</h1>
-            <p style="color:#6c757d; margin:10px 0 0;">Grid for <?php echo date('F j, Y', strtotime($current_date)); ?></p>
+            <p style="color:#6c757d; margin:10px 0 0;">Grid for <?php echo esc_html( date('F j, Y', strtotime($current_date)) ); ?></p>
             <?php
                 $prev_date = date('Y-m-d', strtotime($current_date.' -1 day'));
                 $next_date = date('Y-m-d', strtotime($current_date.' +1 day'));
             ?>
             <div style="margin:15px 0;">
-                <a href="?page=yrr-schedule&date=<?php echo $prev_date; ?>" class="button button-primary">← Previous</a>
+                <a href="<?php echo esc_url( '?page=yrr-schedule&date=' . $prev_date ); ?>" class="button button-primary">← Previous</a>
                 <input type="date" value="<?php echo esc_attr($current_date); ?>"
                        onchange="window.location.href='?page=yrr-schedule&date='+this.value"
                        style="margin:0 10px; padding:5px 10px; border-radius:5px;" />
                 <a href="?page=yrr-schedule" class="button button-success">Today</a>
-                <a href="?page=yrr-schedule&date=<?php echo $next_date; ?>" class="button button-primary">Next →</a>
+                <a href="<?php echo esc_url( '?page=yrr-schedule&date=' . $next_date ); ?>" class="button button-primary">Next →</a>
             </div>
             <div style="margin:20px 0">
                 <span style="background:#28a745;color:white;padding:4px 12px;border-radius:12px;font-weight: bold;margin-right:10px;">✅ Confirmed</span>
@@ -112,7 +115,7 @@ function yenolx_booking_color($status) {
                         <tr>
                             <td style="background:#f8f9fa;font-weight: bold;vertical-align: middle;">
                                 🍽️ <?php echo esc_html($tbl->table_number); ?>
-                                <div style="font-size:0.88rem;color:#6c757d;">👥 <?php echo intval($tbl->capacity); ?> seats</div>
+                <div style="font-size:0.88rem;color:#6c757d;">👥 <?php echo esc_html( intval( $tbl->capacity ) ); ?> seats</div>
                                 <?php if (!empty($tbl->location)): ?>
                                     <div style="font-size:0.82rem;color:#6c757d;">📍 <?php echo esc_html($tbl->location); ?></div>
                                 <?php endif; ?>
@@ -124,13 +127,13 @@ function yenolx_booking_color($status) {
                             ?>
                             <td style="text-align:center;padding:4px;">
                                 <?php if ($booking):?>
-                                    <div onclick="yenolxShowBookingDetails(<?php echo htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8'); ?>)"
-                                         style="background:<?php echo yenolx_booking_color($booking->status); ?>;color:white;padding:5px 1px;border-radius:7px;cursor:pointer;font-size:0.83rem;font-weight:600;">
+                                    <div onclick="yenolxShowBookingDetails(<?php echo esc_js( wp_json_encode( $booking ) ); ?>)"
+                                         style="background:<?php echo esc_attr( yenolx_booking_color( $booking->status ) ); ?>;color:white;padding:5px 1px;border-radius:7px;cursor:pointer;font-size:0.83rem;font-weight:600;">
                                         <?php echo esc_html(mb_substr($booking->customer_name,0,10)); ?><br>
-                                        <span style="font-size:0.73rem;">👥 <?php echo intval($booking->party_size); ?></span>
+                                        <span style="font-size:0.73rem;">👥 <?php echo esc_html( intval( $booking->party_size ) ); ?></span>
                                     </div>
                                 <?php else: ?>
-                                    <div onclick="yenolxQuickBook('<?php echo $tbl->id; ?>','<?php echo $current_date; ?>','<?php echo $slot_time; ?>')"
+                                    <div onclick="yenolxQuickBook('<?php echo esc_js( $tbl->id ); ?>','<?php echo esc_js( $current_date ); ?>','<?php echo esc_js( $slot_time ); ?>')"
                                          style="background: #f8f9fa; border:1.5px dashed #dee2e6; padding:5px 1px; border-radius:7px; cursor:pointer; color:#6c757d; font-size:0.75rem;">
                                         🆓<br>Available
                                     </div>
@@ -153,16 +156,16 @@ function yenolx_booking_color($status) {
             }
             ?>
             <div style="background:linear-gradient(90deg,#28a745 0%,#20c997 100%);color:white;padding:18px;border-radius:10px;text-align:center;">
-                <span style="font-size:1.8rem;font-weight:bold;"><?php echo count($tables);?></span><br>Total Tables
+                <span style="font-size:1.8rem;font-weight:bold;"><?php echo esc_html( count( $tables ) ); ?></span><br>Total Tables
             </div>
             <div style="background:linear-gradient(90deg,#28a745,#17a2b8);color:white;padding:18px;border-radius:10px;text-align:center;">
-                <span style="font-size:1.8rem;font-weight:bold;"><?php echo $conf;?></span><br>Confirmed
+                <span style="font-size:1.8rem;font-weight:bold;"><?php echo esc_html( $conf ); ?></span><br>Confirmed
             </div>
             <div style="background:linear-gradient(90deg,#ffc107,#fd7e14);color:white;padding:18px;border-radius:10px;text-align:center;">
-                <span style="font-size:1.8rem;font-weight:bold;"><?php echo $pend;?></span><br>Pending
+                <span style="font-size:1.8rem;font-weight:bold;"><?php echo esc_html( $pend ); ?></span><br>Pending
             </div>
             <div style="background:linear-gradient(90deg,#007cba,#17a2b8);color:white;padding:18px;border-radius:10px;text-align:center;">
-                <span style="font-size:1.8rem;font-weight:bold;"><?php echo $total;?></span><br>Total Bookings
+                <span style="font-size:1.8rem;font-weight:bold;"><?php echo esc_html( $total ); ?></span><br>Total Bookings
             </div>
         </div>
     </div>
@@ -184,7 +187,7 @@ function yenolx_booking_color($status) {
       <h3 style="margin:0;">Quick Book Table</h3>
       <button onclick="document.getElementById('yenolxQuickBookModal').style.display='none'" style="font-size:24px;border:none;background:none;color:#6c757d;cursor:pointer;">×</button>
     </div>
-    <form method="post" action="<?php echo admin_url('admin.php?page=yrr-reservations'); ?>">
+    <form method="post" action="<?php echo esc_url( admin_url('admin.php?page=yrr-reservations') ); ?>">
       <?php wp_nonce_field('create_manual_reservation','manual_reservation_nonce'); ?>
       <input type="hidden" name="create_manual_reservation" value="1">
       <input type="hidden" id="yenolx_quick_table_id" name="table_id">
@@ -193,7 +196,7 @@ function yenolx_booking_color($status) {
       <label>Name*<input type="text" name="customer_name" required style="width:100%;margin-bottom:13px;" /></label>
       <label>Email*<input type="email" name="customer_email" required style="width:100%;margin-bottom:13px;" /></label>
       <label>Phone*<input type="tel" name="customer_phone" required style="width:100%;margin-bottom:13px;" /></label>
-      <label>Party Size*<select name="party_size" style="width:100%;margin-bottom:13px;"><?php for($i=1;$i<=12;$i++): ?><option value="<?php echo $i; ?>"><?php echo $i;?> guest<?php echo $i!=1?'s':'';?></option><?php endfor; ?></select></label>
+      <label>Party Size*<select name="party_size" style="width:100%;margin-bottom:13px;"><?php for($i=1;$i<=12;$i++): ?><option value="<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?> guest<?php echo $i!=1?'s':'';?></option><?php endfor; ?></select></label>
       <label>Special Requests<textarea name="special_requests" rows="1" style="width:100%;margin-bottom:15px;"></textarea></label>
       <div style="text-align:right;"><button type="submit" style="background:linear-gradient(90deg,#28a745,#20c997);color:white;border:none;padding:10px 18px;border-radius:8px;">Book Table</button></div>
     </form>
@@ -218,7 +221,7 @@ function yenolxShowBookingDetails(booking) {
     <div><strong>Time: </strong>${booking.reservation_time}</div>
     ${booking.special_requests ? '<div><strong>Requests: </strong>' + booking.special_requests + '</div>' : ''}
     <div style="margin-top:18px;text-align:center;">
-      <a href="<?php echo admin_url('admin.php?page=yrr-reservations'); ?>" class="button button-primary">View All Reservations</a>
+      <a href="<?php echo esc_url( admin_url('admin.php?page=yrr-reservations') ); ?>" class="button button-primary">View All Reservations</a>
     </div>
   `;
   modal.style.display = 'flex';
