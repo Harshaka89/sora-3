@@ -182,17 +182,16 @@ class YRR_Tables_Model {
             strtoupper($args['order']) === 'DESC' ? 'DESC' : 'ASC'
         );
         
-        $sql = "SELECT t.*, l.name as location_name 
-                FROM " . YRR_TABLES_TABLE . " t 
-                LEFT JOIN " . YRR_LOCATIONS_TABLE . " l ON t.location_id = l.id 
-                $where_sql 
+        $sql = "SELECT t.*, l.name as location_name
+                FROM " . YRR_TABLES_TABLE . " t
+                LEFT JOIN " . YRR_LOCATIONS_TABLE . " l ON t.location_id = l.id
+                $where_sql
                 $order_sql";
-        
-        if (!empty($where_values)) {
-            return $wpdb->get_results($wpdb->prepare($sql, $where_values));
-        } else {
-            return $wpdb->get_results($sql);
-        }
+
+        // Always prepare the query, even when no placeholders are present, to keep
+        // query handling consistent and future-proof against SQL injection. Passing an
+        // empty array ensures prepare() is called uniformly in all scenarios.
+        return $wpdb->get_results($wpdb->prepare($sql, $where_values ?: []));
     }
     
     /**
