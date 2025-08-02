@@ -342,19 +342,24 @@ class YRR_Admin_Controller {
      * Process admin actions
      */
     private function process_admin_action($action) {
+        $reservation_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
         switch ($action) {
             case 'delete_reservation':
+                check_admin_referer('delete_reservation_' . $reservation_id);
                 $this->delete_reservation();
                 break;
-                
+
             case 'confirm_reservation':
+                check_admin_referer('confirm_reservation_' . $reservation_id);
                 $this->confirm_reservation();
                 break;
-                
+
             case 'cancel_reservation':
+                check_admin_referer('cancel_reservation_' . $reservation_id);
                 $this->cancel_reservation();
                 break;
-                
+
             default:
                 break;
         }

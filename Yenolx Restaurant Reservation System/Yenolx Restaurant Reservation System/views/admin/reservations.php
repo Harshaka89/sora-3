@@ -337,33 +337,33 @@ $locations = YRR_Locations_Model::get_all(true);
                                     <td class="column-actions">
                                         <div class="yrr-reservation-actions">
                                             <?php if ($reservation->status === 'pending'): ?>
-                                                <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-reservations&action=confirm&id=' . $reservation->id), 'confirm_reservation_' . $reservation->id); ?>" 
+                                                <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=yrr-reservations&action=confirm_reservation&id=' . $reservation->id ), 'confirm_reservation_' . $reservation->id ) ); ?>"
                                                    class="button button-small button-primary" title="<?php _e('Confirm Reservation', 'yrr'); ?>">
                                                     ✅ <?php _e('Confirm', 'yrr'); ?>
                                                 </a>
                                             <?php endif; ?>
-                                            
+
                                             <?php if (in_array($reservation->status, ['pending', 'confirmed'])): ?>
-                                                <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-reservations&action=cancel&id=' . $reservation->id), 'cancel_reservation_' . $reservation->id); ?>" 
+                                                <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=yrr-reservations&action=cancel_reservation&id=' . $reservation->id ), 'cancel_reservation_' . $reservation->id ) ); ?>"
                                                    class="button button-small yrr-btn-cancel" title="<?php _e('Cancel Reservation', 'yrr'); ?>"
                                                    onclick="return confirm('<?php _e('Are you sure you want to cancel this reservation?', 'yrr'); ?>')">
                                                     ❌ <?php _e('Cancel', 'yrr'); ?>
                                                 </a>
                                             <?php endif; ?>
-                                            
+
                                             <?php if ($reservation->status === 'confirmed'): ?>
-                                                <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-reservations&action=complete&id=' . $reservation->id), 'complete_reservation_' . $reservation->id); ?>" 
+                                                <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=yrr-reservations&action=complete_reservation&id=' . $reservation->id ), 'complete_reservation_' . $reservation->id ) ); ?>"
                                                    class="button button-small" title="<?php _e('Mark as Completed', 'yrr'); ?>">
                                                     🎉 <?php _e('Complete', 'yrr'); ?>
                                                 </a>
                                             <?php endif; ?>
-                                            
-                                            <a href="#" class="button button-small yrr-btn-edit-reservation" 
+
+                                            <a href="#" class="button button-small yrr-btn-edit-reservation"
                                                data-id="<?php echo esc_attr($reservation->id); ?>" title="<?php _e('Edit Reservation', 'yrr'); ?>">
                                                 ✏️ <?php _e('Edit', 'yrr'); ?>
                                             </a>
-                                            
-                                            <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=yrr-reservations&action=delete&id=' . $reservation->id), 'delete_reservation_' . $reservation->id); ?>" 
+
+                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=yrr-reservations&action=delete_reservation&id=' . $reservation->id ), 'delete_reservation_' . $reservation->id ) ); ?>"
                                                class="button button-small button-link-delete" title="<?php _e('Delete Reservation', 'yrr'); ?>"
                                                onclick="return confirm('<?php _e('Are you sure you want to delete this reservation? This action cannot be undone.', 'yrr'); ?>')">
                                                 🗑️ <?php _e('Delete', 'yrr'); ?>
