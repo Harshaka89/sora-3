@@ -108,12 +108,9 @@ class YRR_Hours_Model {
         }
         
         $sql .= " ORDER BY FIELD(day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')";
-        
-        if (!empty($params)) {
-            $sql = $wpdb->prepare($sql, $params);
-        }
-        
-        return $wpdb->get_results($sql);
+
+        // Use prepare even when there are no bound values for consistency
+        return $wpdb->get_results($wpdb->prepare($sql, $params ?: []));
     }
     
     /**
