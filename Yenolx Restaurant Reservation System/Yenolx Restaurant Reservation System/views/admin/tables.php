@@ -1,4 +1,6 @@
-<?php include_once('../../includes/auth-check.php');
+
+<?php
+
 
 if (!defined('ABSPATH')) exit;
 
