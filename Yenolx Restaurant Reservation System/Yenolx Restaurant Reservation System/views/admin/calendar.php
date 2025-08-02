@@ -1,6 +1,5 @@
 <?php
-<?php include_once('../../includes/auth-check.php'); ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+include_once('../../includes/auth-check.php');
 
 /**
  * Weekly Calendar Admin View - Clean and Professional
@@ -8,6 +7,10 @@
  */
 
 if (!defined('ABSPATH')) { exit('Direct access forbidden.'); }
+
+// Ensure all dynamic output is properly escaped using WordPress helper functions.
+?>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // Get week range
 $current_week = isset($_GET['week']) ? sanitize_text_field($_GET['week']) : date('Y-m-d');
@@ -59,16 +62,16 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
     <hr class="wp-header-end">
     <div class="yrr-calendar-header">
         <div class="yrr-calendar-nav">
-            <a href="<?php echo admin_url('admin.php?page=yrr-calendar&week='.$prev_week.($location_id?"&location_id=".$location_id:'') ); ?>" class="button">
+            <a href="<?php echo esc_url( admin_url('admin.php?page=yrr-calendar&week='.$prev_week.($location_id?"&location_id=".$location_id:'') ) ); ?>" class="button">
                 <span class="dashicons dashicons-arrow-left-alt2"></span> <?php _e('Previous Week', 'yrr'); ?>
             </a>
             <div class="yrr-current-week">
-                <h2><?php echo date('F j',strtotime($week_start)).' - '.date('F j, Y',strtotime($week_end)); ?></h2>
-                <a href="<?php echo admin_url('admin.php?page=yrr-calendar'.($location_id?"&location_id=".$location_id:'')); ?>" class="button button-secondary">
+                <h2><?php echo esc_html( date('F j',strtotime($week_start)) . ' - ' . date('F j, Y',strtotime($week_end)) ); ?></h2>
+                <a href="<?php echo esc_url( admin_url('admin.php?page=yrr-calendar'.($location_id?"&location_id=".$location_id:'')) ); ?>" class="button button-secondary">
                     <?php _e('This Week', 'yrr'); ?>
                 </a>
             </div>
-            <a href="<?php echo admin_url('admin.php?page=yrr-calendar&week='.$next_week.($location_id?"&location_id=".$location_id:'') ); ?>" class="button">
+            <a href="<?php echo esc_url( admin_url('admin.php?page=yrr-calendar&week='.$next_week.($location_id?"&location_id=".$location_id:'') ) ); ?>" class="button">
                 <?php _e('Next Week', 'yrr'); ?> <span class="dashicons dashicons-arrow-right-alt2"></span>
             </a>
         </div>
@@ -93,16 +96,16 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
     <div class="yrr-week-stats">
         <div class="yrr-stats-grid">
             <div class="yrr-stat-card"><div class="yrr-stat-icon">📅</div>
-                <div class="yrr-stat-content"><h3><?php echo count($reservations); ?></h3><p><?php _e('Reservations', 'yrr'); ?></p></div>
+                <div class="yrr-stat-content"><h3><?php echo esc_html( count( $reservations ) ); ?></h3><p><?php _e('Reservations', 'yrr'); ?></p></div>
             </div>
             <div class="yrr-stat-card"><div class="yrr-stat-icon">👥</div>
-                <div class="yrr-stat-content"><h3><?php echo $total_covers; ?></h3><p><?php _e('Covers', 'yrr'); ?></p></div>
+                <div class="yrr-stat-content"><h3><?php echo esc_html( $total_covers ); ?></h3><p><?php _e('Covers', 'yrr'); ?></p></div>
             </div>
             <div class="yrr-stat-card"><div class="yrr-stat-icon">💰</div>
-                <div class="yrr-stat-content"><h3>$<?php echo number_format($total_revenue, 2); ?></h3><p><?php _e('Revenue', 'yrr'); ?></p></div>
+                <div class="yrr-stat-content"><h3>$<?php echo esc_html( number_format($total_revenue, 2) ); ?></h3><p><?php _e('Revenue', 'yrr'); ?></p></div>
             </div>
             <div class="yrr-stat-card"><div class="yrr-stat-icon">📈</div>
-                <div class="yrr-stat-content"><h3>$<?php echo number_format($avg_per_cover,2); ?></h3><p><?php _e('Avg/Cover', 'yrr'); ?></p></div>
+                <div class="yrr-stat-content"><h3>$<?php echo esc_html( number_format($avg_per_cover,2) ); ?></h3><p><?php _e('Avg/Cover', 'yrr'); ?></p></div>
             </div>
         </div>
     </div>
@@ -111,7 +114,7 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
             <!-- Time Column -->
             <div class="yrr-time-column"><div class="yrr-time-header"><?php _e('Time', 'yrr'); ?></div>
                 <?php for($hour=9;$hour<=23;$hour++): ?>
-                <div class="yrr-time-slot"><?php echo date('g A', strtotime("$hour:00")); ?></div>
+                <div class="yrr-time-slot"><?php echo esc_html( date('g A', strtotime("$hour:00")) ); ?></div>
                 <?php endfor; ?>
             </div>
             <!-- Day Columns -->
@@ -123,13 +126,13 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
                 $day_rev = array_sum(array_map(function($r){return floatval($r->final_price ?? 0);},$day_res));
                 $is_today = ($dt === date('Y-m-d'));
             ?>
-            <div class="yrr-day-column <?php echo $is_today?'yrr-today':''; ?>" data-date="<?php echo $dt; ?>">
+            <div class="yrr-day-column <?php echo esc_attr( $is_today ? 'yrr-today' : '' ); ?>" data-date="<?php echo esc_attr( $dt ); ?>">
                 <div class="yrr-day-header">
-                    <h3><?php echo $day_name; ?></h3>
-                    <div class="yrr-day-date"><?php echo date('M j', strtotime($dt)); ?></div>
+                    <h3><?php echo esc_html( $day_name ); ?></h3>
+                    <div class="yrr-day-date"><?php echo esc_html( date('M j', strtotime($dt)) ); ?></div>
                     <div class="yrr-day-stats">
-                        <span class="yrr-day-covers"><?php echo $day_covers; ?> covers</span>
-                        <span class="yrr-day-revenue">$<?php echo number_format($day_rev, 0); ?></span>
+                        <span class="yrr-day-covers"><?php echo esc_html( $day_covers ); ?> covers</span>
+                        <span class="yrr-day-revenue">$<?php echo esc_html( number_format($day_rev, 0) ); ?></span>
                     </div>
                 </div>
                 <div class="yrr-day-slots">
@@ -139,19 +142,19 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
                             $h = date('H', strtotime($r->reservation_time));
                             return intval($h) === $hour; });
                     ?>
-                    <div class="yrr-time-slot-container" data-time="<?php echo $time_24; ?>">
+                    <div class="yrr-time-slot-container" data-time="<?php echo esc_attr( $time_24 ); ?>">
                         <?php if (empty($slots)): ?>
-                            <div class="yrr-empty-slot" tabindex="0" aria-label="<?php echo esc_attr(__('Create new reservation', 'yrr')); ?>" onclick="YRR_Calendar.createReservation('<?php echo $dt; ?>','<?php echo $time_24; ?>')">
+                            <div class="yrr-empty-slot" tabindex="0" aria-label="<?php echo esc_attr(__('Create new reservation', 'yrr')); ?>" onclick="YRR_Calendar.createReservation('<?php echo esc_js( $dt ); ?>','<?php echo esc_js( $time_24 ); ?>')">
                                 <span class="yrr-add-icon">+</span>
                             </div>
                         <?php else: foreach($slots as $r): ?>
                             <div class="yrr-reservation-block yrr-status-<?php echo esc_attr($r->status ?? 'pending'); ?>"
                                 data-reservation-id="<?php echo esc_attr($r->id); ?>"
                                 tabindex="0" aria-label="<?php echo esc_attr(__('View reservation details', 'yrr')); ?>"
-                                onclick="YRR_Calendar.showReservationDetails(<?php echo esc_attr($r->id); ?>)">
-                                <div class="yrr-reservation-time"><?php echo date('g:i A', strtotime($r->reservation_time)); ?></div>
+                                onclick="YRR_Calendar.showReservationDetails(<?php echo esc_js( $r->id ); ?>)">
+                                <div class="yrr-reservation-time"><?php echo esc_html( date('g:i A', strtotime($r->reservation_time)) ); ?></div>
                                 <div class="yrr-reservation-customer"><?php echo esc_html($r->customer_name ?? ''); ?></div>
-                                <div class="yrr-reservation-party">👥 <?php echo intval($r->party_size ?? 0); ?><?php if(!empty($r->table_number)):?> • 🪑 <?php echo esc_html($r->table_number); ?><?php endif;?></div>
+                                <div class="yrr-reservation-party">👥 <?php echo esc_html( intval($r->party_size ?? 0) ); ?><?php if(!empty($r->table_number)):?> • 🪑 <?php echo esc_html($r->table_number); ?><?php endif;?></div>
                             </div>
                         <?php endforeach; endif; ?>
                     </div>
