@@ -40,6 +40,6 @@ function wp_enqueue_style(...$args) { $GLOBALS['enqueued_styles'][] = $args; }
 function wp_enqueue_script(...$args) { $GLOBALS['enqueued_scripts'][] = $args; }
 
 // Plugin constants
-define('YRR_PLUGIN_PATH', dirname(__DIR__) . '/Yenolx Restaurant Reservation System/Yenolx Restaurant Reservation System/');
+define('YRR_PLUGIN_PATH', dirname(__DIR__) . '/yenolx-restaurant-reservation-system/');
 define('YRR_PLUGIN_URL', '');
 define('YRR_VERSION', '1.0');
