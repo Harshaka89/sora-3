@@ -1,4 +1,6 @@
 <?php
+<?php include_once('../../includes/auth-check.php'); ?>
+
 /**
  * All Reservations Admin View - Comprehensive reservation management interface
  * Displays all reservations with advanced filtering, sorting, and bulk actions

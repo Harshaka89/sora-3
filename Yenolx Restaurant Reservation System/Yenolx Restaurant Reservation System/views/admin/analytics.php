@@ -1,4 +1,6 @@
 <?php
+<?php include_once('../../includes/auth-check.php'); ?>
+
 if (!defined('ABSPATH')) exit;
 
 // EXAMPLE: Fetch summary stats (replace with YRR_Reservation_Model helpers)

@@ -1,4 +1,6 @@
 <?php
+<?php include_once('../../includes/auth-check.php'); ?>
+
 /**
  * Weekly Calendar Admin View - Clean and Professional
  * (assets/css/admin-calendar.css, assets/js/admin-calendar.js must be loaded for full UI)

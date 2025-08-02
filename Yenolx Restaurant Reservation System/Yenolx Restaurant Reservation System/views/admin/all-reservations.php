@@ -1,4 +1,5 @@
 <?php
+<?php include_once('../../includes/auth-check.php'); ?>
 
 if (!defined('ABSPATH')) exit;
 $reservations = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::get_all() : array();

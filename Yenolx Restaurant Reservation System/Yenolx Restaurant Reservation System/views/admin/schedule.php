@@ -1,4 +1,6 @@
 <?php
+<?php include_once('../../includes/auth-check.php'); ?>
+
 if (!defined('ABSPATH')) exit;
 
 // 1. Get selected date (?date=..., or today)
