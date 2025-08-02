@@ -13,9 +13,12 @@ $stmt->execute([$username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($user && password_verify($password, $user['password'])) {
+  session_regenerate_id(true);
   $_SESSION['admin_logged_in'] = true;
   $_SESSION['admin_username'] = $username;
   header("Location: views/admin/dashboard.php");
+  exit;
 } else {
   header("Location: login.php?error=1");
+  exit;
 }
