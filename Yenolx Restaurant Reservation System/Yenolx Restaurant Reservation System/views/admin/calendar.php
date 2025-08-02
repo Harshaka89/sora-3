@@ -1,5 +1,4 @@
-<?php
-include_once('../../includes/auth-check.php');
+<?php include_once('../../includes/auth-check.php');
 
 /**
  * Weekly Calendar Admin View - Clean and Professional
