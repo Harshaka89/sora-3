@@ -1,4 +1,6 @@
-<?php require_once __DIR__ . '/../../includes/auth-check.php'; ?>
+
+<?php
+
 <a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 if (!defined('ABSPATH')) exit;
