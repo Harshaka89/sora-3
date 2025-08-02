@@ -1,11 +1,14 @@
 <?php
 include_once('../../includes/auth-check.php');
-
+?>
+<link rel="stylesheet" href="../../assets/admin.css">
+<script src="../../assets/admin.js"></script>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+<?php
 if (!defined('ABSPATH')) exit;
 
 // Ensure all dynamic output is properly escaped using WordPress helper functions.
 ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // 1. Get selected date (?date=..., or today)
 $current_date = isset($_GET['date']) ? sanitize_text_field($_GET['date']) : date('Y-m-d');

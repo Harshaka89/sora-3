@@ -1,11 +1,14 @@
 <?php
 include_once('../../includes/auth-check.php');
-
+?>
+<link rel="stylesheet" href="../../assets/admin.css">
+<script src="../../assets/admin.js"></script>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+<?php
 if (!defined('ABSPATH')) exit;
 
 // Ensure all dynamic output is properly escaped using WordPress helper functions.
 ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // Handle ADD
 if (!empty($_POST['add_table']) && wp_verify_nonce($_POST['table_nonce'], 'yrr_table_action')) {

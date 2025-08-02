@@ -1,5 +1,10 @@
 <?php
 include_once('../../includes/auth-check.php');
+?>
+<link rel="stylesheet" href="../../assets/admin.css">
+<script src="../../assets/admin.js"></script>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
+<?php
 
 /**
  * Weekly Calendar Admin View - Clean and Professional
@@ -10,7 +15,6 @@ if (!defined('ABSPATH')) { exit('Direct access forbidden.'); }
 
 // Ensure all dynamic output is properly escaped using WordPress helper functions.
 ?>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 // Get week range
 $current_week = isset($_GET['week']) ? sanitize_text_field($_GET['week']) : date('Y-m-d');
