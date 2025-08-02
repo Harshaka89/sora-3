@@ -1,6 +1,5 @@
-<?php include_once('../../includes/auth-check.php'); ?>
-<link rel="stylesheet" href="../../assets/admin.css">
-<script src="../../assets/admin.js"></script>
+
+<?php 
 <a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 

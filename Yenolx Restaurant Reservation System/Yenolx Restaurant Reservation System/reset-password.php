@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/includes/auth-check.php';
-session_start();
 if (empty($_SESSION['reset_password_nonce'])) {
     $_SESSION['reset_password_nonce'] = bin2hex(random_bytes(32));
 }

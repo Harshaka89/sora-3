@@ -1,10 +1,8 @@
+
+
 <?php
-include_once('../../includes/auth-check.php');
-?>
-<link rel="stylesheet" href="../../assets/admin.css">
-<script src="../../assets/admin.js"></script>
-<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
-<?php
+
+
 
 /**
  * Weekly Calendar Admin View - Clean and Professional
@@ -58,11 +56,30 @@ $next_week = date('Y-m-d', strtotime($week_start.' +7 days'));
 $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday');
 ?>
 <div class="yrr-admin-wrap yrr-calendar-wrap">
-    <h1 class="wp-heading-inline"><?php _e('Reservations Calendar', 'yrr'); ?></h1>
-    <a href="#" class="page-title-action yrr-btn-create-reservation">
-        <span class="dashicons dashicons-plus-alt"></span>
-        <?php _e('Add New Reservation', 'yrr'); ?>
-    </a>
+    <div class="yrr-header-bar">
+        <div class="yrr-header-title">
+            <h1 class="wp-heading-inline"><?php _e('Reservations Calendar', 'yrr'); ?></h1>
+            <a href="#" class="page-title-action yrr-btn-create-reservation">
+                <span class="dashicons dashicons-plus-alt"></span>
+                <?php _e('Add New Reservation', 'yrr'); ?>
+            </a>
+        </div>
+        <?php if(count($locations)>1): ?>
+            <form method="get" class="yrr-location-filter">
+                <input type="hidden" name="page" value="yrr-calendar">
+                <input type="hidden" name="week" value="<?php echo esc_attr($current_week); ?>">
+                <label for="location_filter"><?php _e('Location:', 'yrr'); ?></label>
+                <select name="location_id" id="location_filter" onchange="this.form.submit()">
+                    <option value=""><?php _e('All Locations', 'yrr'); ?></option>
+                    <?php foreach ($locations as $loc): ?>
+                        <option value="<?php echo esc_attr($loc->id); ?>" <?php selected($location_id, $loc->id); ?>>
+                            <?php echo esc_html($loc->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+        <?php endif; ?>
+    </div>
     <hr class="wp-header-end">
     <div class="yrr-calendar-header">
         <div class="yrr-calendar-nav">
@@ -79,23 +96,6 @@ $days = array('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
                 <?php _e('Next Week', 'yrr'); ?> <span class="dashicons dashicons-arrow-right-alt2"></span>
             </a>
         </div>
-        <?php if(count($locations)>1): ?>
-        <div>
-            <form method="get" class="yrr-location-filter" style="margin:0;">
-                <input type="hidden" name="page" value="yrr-calendar">
-                <input type="hidden" name="week" value="<?php echo esc_attr($current_week); ?>">
-                <label for="location_filter"><?php _e('Location:', 'yrr'); ?></label>
-                <select name="location_id" id="location_filter" onchange="this.form.submit()">
-                    <option value=""><?php _e('All Locations', 'yrr'); ?></option>
-                    <?php foreach ($locations as $loc): ?>
-                        <option value="<?php echo esc_attr($loc->id); ?>" <?php selected($location_id, $loc->id); ?>>
-                            <?php echo esc_html($loc->name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
-        </div>
-        <?php endif; ?>
     </div>
     <div class="yrr-week-stats">
         <div class="yrr-stats-grid">
