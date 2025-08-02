@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../includes/class-database.php';
 require_once __DIR__ . '/../includes/class-slot-helper.php';
 
 header('Content-Type: application/json');
@@ -10,19 +9,10 @@ if (!$date) {
   exit;
 }
 
-$db = new Database();
-$pdo = $db->connect();
+$party_size = isset($_GET['party_size']) ? (int) $_GET['party_size'] : 2;
+$location_id = isset($_GET['location_id']) ? (int) $_GET['location_id'] : 1;
 
-// Load existing reservations for that day
-$stmt = $pdo->prepare("SELECT time FROM reservations WHERE date = ?");
-$stmt->execute([$date]);
-$booked_times = array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'time');
-
-// Generate available time slots from SlotHelper
-$slots = SlotHelper::generateTimeSlots('11:00', '22:00', 30); // 11 AM to 10 PM, 30-min slots
-
-$available = array_filter($slots, function ($slot) use ($booked_times) {
-  return !in_array($slot, $booked_times);
-});
+// Generate available time slots using YRR_Slot_Helper
+$available = YRR_Slot_Helper::get_available_slots($date, $party_size, $location_id);
 
 echo json_encode(array_values($available));
