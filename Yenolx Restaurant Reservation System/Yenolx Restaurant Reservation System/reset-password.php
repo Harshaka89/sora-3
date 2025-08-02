@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/includes/auth-check.php';
 session_start();
+if (empty($_SESSION['reset_password_nonce'])) {
+    $_SESSION['reset_password_nonce'] = bin2hex(random_bytes(32));
+}
+$nonce = $_SESSION['reset_password_nonce'];
 ?>
 
 <!DOCTYPE html>
@@ -23,6 +27,7 @@ session_start();
             <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
           <?php endif; ?>
           <form method="POST" action="process-reset-password.php">
+            <input type="hidden" name="nonce" value="<?= htmlspecialchars($nonce) ?>">
             <div class="mb-3">
               <label>Current Password</label>
               <input type="password" name="current_password" class="form-control" required>
