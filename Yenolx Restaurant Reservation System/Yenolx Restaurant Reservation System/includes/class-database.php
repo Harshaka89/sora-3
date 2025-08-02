@@ -1,13 +1,44 @@
 <?php
 /**
+ * Simple PDO wrapper used by standalone scripts.
+ */
+class Database {
+    private $pdo;
+
+    /**
+     * Connect to the database and return a PDO instance.
+     */
+    public function connect(): PDO {
+        if ($this->pdo === null) {
+            $host = getenv('DB_HOST') ?: 'localhost';
+            $db   = getenv('DB_NAME') ?: 'yenolx';
+            $user = getenv('DB_USER') ?: 'root';
+            $pass = getenv('DB_PASS') ?: '';
+            $charset = 'utf8mb4';
+
+            $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+            $options = [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+
+            $this->pdo = new PDO($dsn, $user, $pass, $options);
+        }
+
+        return $this->pdo;
+    }
+}
+
+if (!defined('ABSPATH')) {
+    // Not running within WordPress; skip plugin-specific database management.
+    return;
+}
+
+/**
  * Database management class for Yenolx Restaurant Reservation System
  * Handles table creation, updates, and data migrations
  */
-
-if (!defined('ABSPATH')) {
-    exit('Direct access forbidden.');
-}
-
 class YRR_Database {
     
     /**
