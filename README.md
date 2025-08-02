@@ -167,3 +167,5 @@ https://roadmap.sh
 https://www.theaccessgroup.com/en-gb/hospitality/sectors/restaurants/reservations/
 
 
+
+Additional documentation can be found in the [docs](docs/) directory.
