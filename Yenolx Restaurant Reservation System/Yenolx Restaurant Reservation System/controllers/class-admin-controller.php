@@ -393,7 +393,64 @@ class YRR_Admin_Controller {
         
         $this->redirect_back();
     }
-    
+
+    /**
+     * Update existing reservation
+     */
+    private function update_reservation() {
+        $reservation_id = isset($_POST['reservation_id']) ? intval($_POST['reservation_id']) : intval($_POST['id']);
+
+        if (!$reservation_id) {
+            $this->add_admin_notice(__('Invalid reservation ID.', 'yrr'), 'error');
+            $this->redirect_back();
+            return;
+        }
+
+        $data = array(
+            'customer_name'   => sanitize_text_field($_POST['customer_name'] ?? ''),
+            'customer_email'  => sanitize_email($_POST['customer_email'] ?? ''),
+            'customer_phone'  => sanitize_text_field($_POST['customer_phone'] ?? ''),
+            'party_size'      => intval($_POST['party_size'] ?? 0),
+            'reservation_date' => sanitize_text_field($_POST['reservation_date'] ?? ''),
+            'reservation_time' => sanitize_text_field($_POST['reservation_time'] ?? ''),
+            'special_requests' => sanitize_textarea_field($_POST['special_requests'] ?? '')
+        );
+
+        if (isset($_POST['status'])) {
+            $data['status'] = sanitize_text_field($_POST['status']);
+        }
+        if (isset($_POST['table_id']) && $_POST['table_id'] !== '') {
+            $data['table_id'] = intval($_POST['table_id']);
+        }
+        if (isset($_POST['location_id'])) {
+            $data['location_id'] = intval($_POST['location_id']);
+        }
+        if (isset($_POST['source'])) {
+            $data['source'] = sanitize_text_field($_POST['source']);
+        }
+
+        $required = array('customer_name', 'customer_email', 'customer_phone', 'party_size', 'reservation_date', 'reservation_time');
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                $this->add_admin_notice(sprintf(__('Field %s is required.', 'yrr'), $field), 'error');
+                $this->redirect_back();
+                return;
+            }
+        }
+
+        $result = YRR_Reservation_Model::update($reservation_id, $data);
+
+        if (is_wp_error($result)) {
+            $this->add_admin_notice($result->get_error_message(), 'error');
+        } elseif ($result) {
+            $this->add_admin_notice(__('Reservation updated successfully!', 'yrr'), 'success');
+        } else {
+            $this->add_admin_notice(__('Failed to update reservation.', 'yrr'), 'error');
+        }
+
+        $this->redirect_back();
+    }
+
     /**
      * Delete reservation
      */
