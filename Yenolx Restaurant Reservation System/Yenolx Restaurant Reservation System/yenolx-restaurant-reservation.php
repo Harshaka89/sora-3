@@ -437,6 +437,90 @@ public function admin_menu() {
         <?php
     }
     
+
+
+
+    add_action('admin_init', 'yrr_register_core_settings');
+
+function yrr_register_core_settings() {
+    // This is the group name for all your settings
+    $settings_group = 'yrr_settings_group';
+    // This is the page slug where the settings will be displayed
+    $page_slug = 'yrr_settings_page';
+
+    // Register each setting you want to save
+    register_setting($settings_group, 'yrr_slot_duration');
+    register_setting($settings_group, 'yrr_reservation_enabled');
+    register_setting($settings_group, 'yrr_location');
+    // Add other settings like 'yrr_business_name', 'yrr_max_party_size' here if needed.
+
+    // Add a settings section to group the fields
+    add_settings_section(
+        'yrr_general_section',
+        'General Reservation Settings',
+        null, // Optional callback to display a description for the section
+        $page_slug
+    );
+
+    // Add the individual fields to our new section
+    add_settings_field(
+        'yrr_slot_duration',
+        'Time Slot Duration',
+        'yrr_render_slot_duration_field', // This function will render the HTML input
+        $page_slug,
+        'yrr_general_section'
+    );
+
+    add_settings_field(
+        'yrr_reservation_enabled',
+        'Enable Reservations',
+        'yrr_render_reservation_enabled_field',
+        $page_slug,
+        'yrr_general_section'
+    );
+    
+    add_settings_field(
+        'yrr_location',
+        'Restaurant Location',
+        'yrr_render_location_field',
+        $page_slug,
+        'yrr_general_section'
+    );
+}
+
+// --- These functions render the HTML for each field ---
+
+function yrr_render_slot_duration_field() {
+    $current_value = get_option('yrr_slot_duration', 60); // Default to 60 minutes if not set
+    $options = [
+        15 => '15 Minutes',
+        20 => '20 Minutes',
+        30 => '30 Minutes',
+        60 => '1 Hour',
+        90 => '1.5 Hours',
+        120 => '2 Hours',
+        180 => '3 Hours',
+    ];
+    echo '<select name="yrr_slot_duration">';
+    foreach ($options as $value => $label) {
+        echo '<option value="' . esc_attr($value) . '" ' . selected($current_value, $value, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">The length of each booking time slot.</p>';
+}
+
+function yrr_render_reservation_enabled_field() {
+    $current_value = get_option('yrr_reservation_enabled', 1); // Default to enabled
+    echo '<label><input type="checkbox" name="yrr_reservation_enabled" value="1" ' . checked($current_value, 1, false) . ' /> ';
+    echo 'Allow customers to make new reservations.</label>';
+    echo '<p class="description">Uncheck this to temporarily disable all bookings site-wide.</p>';
+}
+
+function yrr_render_location_field() {
+    $current_value = get_option('yrr_location', '');
+    echo '<input type="text" name="yrr_location" value="' . esc_attr($current_value) . '" class="regular-text" placeholder="e.g., Downtown"/>';
+    echo '<p class="description">The primary city or area of your restaurant.</p>';
+}
     /**
      * Show admin notices
      */

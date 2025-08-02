@@ -172,3 +172,26 @@ if (!empty($_POST['settings_nonce']) && wp_verify_nonce($_POST['settings_nonce']
         </form>
     </div>
 </div>
+<div class="wrap yrr-admin-wrap">
+    <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+
+    <?php 
+        // This displays any success or error messages (e.g., "Settings saved.")
+        settings_errors(); 
+    ?>
+
+    <div class="yrr-settings-form-container" style="max-width: 800px; background: #fff; padding: 20px 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <form method="post" action="options.php">
+            <?php
+                // Renders hidden security fields (nonce, etc.) for the group 'yrr_settings_group'
+                settings_fields('yrr_settings_group');
+
+                // Renders all sections and fields added to the page 'yrr_settings_page'
+                do_settings_sections('yrr_settings_page');
+
+                // Renders the "Save Changes" button
+                submit_button('Save All Settings');
+            ?>
+        </form>
+    </div>
+</div>
