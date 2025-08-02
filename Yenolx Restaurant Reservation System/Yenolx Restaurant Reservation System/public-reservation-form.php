@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$_SESSION['reservation_csrf_token'] = bin2hex(random_bytes(32));
 require_once __DIR__ . '/includes/class-database.php';
 require_once __DIR__ . '/includes/class-slot-helper.php';
 
@@ -21,6 +25,7 @@ $today = date('Y-m-d');
         <h3 class="mb-4">Make a Reservation</h3>
 
         <form method="POST" action="submit-reservation.php">
+          <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['reservation_csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
           <div class="mb-3">
             <label for="res_name" class="form-label">Full Name</label>
             <input type="text" class="form-control" id="res_name" name="name" required>
