@@ -1,5 +1,6 @@
 <?php
 <?php include_once('../../includes/auth-check.php'); ?>
+<a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
 if (!defined('ABSPATH')) exit;
 $reservations = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::get_all() : array();
