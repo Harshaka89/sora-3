@@ -1,11 +1,19 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+// Ensure required models are loaded
+if (!class_exists('YRR_Reservation_Model') && file_exists(YRR_PLUGIN_PATH . 'models/class-reservation-model.php')) {
+    require_once YRR_PLUGIN_PATH . 'models/class-reservation-model.php';
+}
+if (!class_exists('YRR_Tables_Model') && file_exists(YRR_PLUGIN_PATH . 'models/class-tables-model.php')) {
+    require_once YRR_PLUGIN_PATH . 'models/class-tables-model.php';
+}
+
 // You can adjust these values or fetch them from your database/models.
 $res_count   = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::get_total_count() : 0;
-//$cover_count = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::count_covers() : 0;
-//$table_count = class_exists('YRR_Tables_Model') ? count(YRR_Tables_Model::get_all()) : 0;
-//$rev         = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::total_revenue_this_month() : 0.00;
+$cover_count = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::count_covers() : 0;
+$table_count = class_exists('YRR_Tables_Model') ? count(YRR_Tables_Model::get_all()) : 0;
+$rev         = class_exists('YRR_Reservation_Model') ? YRR_Reservation_Model::total_revenue_this_month() : 0.00;
 
 ?>
 

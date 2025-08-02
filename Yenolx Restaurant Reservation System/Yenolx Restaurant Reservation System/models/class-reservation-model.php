@@ -272,16 +272,94 @@ class YRR_Reservation_Model {
         if (!empty($where_clauses)) {
             $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
         }
-        
+
         $sql = "SELECT COUNT(*) FROM " . YRR_RESERVATIONS_TABLE . " $where_sql";
-        
+
         if (!empty($where_values)) {
             return intval($wpdb->get_var($wpdb->prepare($sql, $where_values)));
         } else {
             return intval($wpdb->get_var($sql));
         }
     }
-    
+
+    /**
+     * Count total covers (guests) for reservations
+     */
+    public static function count_covers($filters = array()) {
+        global $wpdb;
+
+        $where_clauses = array();
+        $where_values = array();
+
+        if (!empty($filters['location_id'])) {
+            $where_clauses[] = "location_id = %d";
+            $where_values[] = $filters['location_id'];
+        }
+
+        if (!empty($filters['status'])) {
+            $where_clauses[] = "status = %s";
+            $where_values[] = $filters['status'];
+        }
+
+        if (!empty($filters['date_from'])) {
+            $where_clauses[] = "reservation_date >= %s";
+            $where_values[] = $filters['date_from'];
+        }
+
+        if (!empty($filters['date_to'])) {
+            $where_clauses[] = "reservation_date <= %s";
+            $where_values[] = $filters['date_to'];
+        }
+
+        if (!empty($filters['table_id'])) {
+            $where_clauses[] = "table_id = %d";
+            $where_values[] = $filters['table_id'];
+        }
+
+        if (!empty($filters['search'])) {
+            $where_clauses[] = "(customer_name LIKE %s OR customer_email LIKE %s OR reservation_code LIKE %s)";
+            $search_term = '%' . $wpdb->esc_like($filters['search']) . '%';
+            $where_values[] = $search_term;
+            $where_values[] = $search_term;
+            $where_values[] = $search_term;
+        }
+
+        $where_sql = '';
+        if (!empty($where_clauses)) {
+            $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
+        }
+
+        $sql = "SELECT SUM(party_size) FROM " . YRR_RESERVATIONS_TABLE . " $where_sql";
+
+        if (!empty($where_values)) {
+            $result = $wpdb->get_var($wpdb->prepare($sql, $where_values));
+        } else {
+            $result = $wpdb->get_var($sql);
+        }
+
+        return intval($result);
+    }
+
+    /**
+     * Calculate total revenue for the current month
+     */
+    public static function total_revenue_this_month() {
+        global $wpdb;
+
+        $start_of_month = date('Y-m-01', current_time('timestamp'));
+        $end_of_month   = date('Y-m-t', current_time('timestamp'));
+
+        $sql = $wpdb->prepare(
+            "SELECT SUM(final_price) FROM " . YRR_RESERVATIONS_TABLE . " WHERE reservation_date BETWEEN %s AND %s AND status IN ('confirmed', 'completed')",
+            $start_of_month,
+            $end_of_month
+        );
+
+        $result = $wpdb->get_var($sql);
+
+        return floatval($result);
+    }
+
     /**
      * Get reservations by date range
      */
