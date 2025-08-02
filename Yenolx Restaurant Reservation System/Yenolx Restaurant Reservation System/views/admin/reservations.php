@@ -1,4 +1,3 @@
-<?php
 <?php include_once('../../includes/auth-check.php'); ?>
 <a href="../../reset-password.php" class="btn btn-outline-secondary">Change Password</a>
 
