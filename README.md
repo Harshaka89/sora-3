@@ -168,4 +168,12 @@ https://www.theaccessgroup.com/en-gb/hospitality/sectors/restaurants/reservation
 
 
 
+## Running Tests
+
+Execute the automated tests using PHPUnit:
+
+```bash
+phpunit --configuration tests/phpunit.xml
+```
+
 Additional documentation can be found in the [docs](docs/) directory.
